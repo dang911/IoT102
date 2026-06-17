@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Home IoT Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar card">
+            <div class="logo">
+                <img src="assets/logo.svg" alt="Logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%238b5cf6\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\'></path><polyline points=\'9 22 9 12 15 12 15 22\'></polyline></svg>'">
+                <h2>SmartHome</h2>
+            </div>
+            <nav class="menu">
+                <a href="#" class="active"><span>🏠</span> Dashboard</a>
+                <a href="#"><span>🌡</span> Temperature</a>
+                <a href="#"><span>💡</span> Smart Lighting</a>
+                <a href="#"><span>📊</span> Analytics</a>
+                <a href="#"><span>⚙</span> Settings</a>
+            </nav>
+        </aside>
+
+        <main>
+            <header class="top-bar card">
+                <div class="hamburger-menu" id="hamburger-menu">☰</div>
+                <div class="user-info">
+                    <span>Welcome, Admin</span>
+                    <div class="avatar"></div>
+                </div>
+            </header>
+
+            <section class="hero-card card gradient-bg">
+                <div class="hero-content">
+                    <h1>Smart Home IoT System</h1>
+                    <p>Temperature Monitoring & Smart Lighting Control</p>
+                    <div class="status-indicator">
+                        <span class="dot online"></span>
+                        <span>System Online ✓</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="cards grid-2-col">
+                <div class="card temp-card">
+                    <div class="card-header">
+                        <h3>🌡 Temperature</h3>
+                        <img src="assets/temperature.svg" alt="" onerror="this.style.display='none'">
+                    </div>
+                    <div class="card-body">
+                        <h2 id="temp-value" class="value text-cyan">29.4°C</h2>
+                        <p class="status">Status: <span id="temp-status">Normal</span></p>
+                        <div class="min-max">
+                            <span>Max: <span id="temp-max">--</span>°C</span>
+                            <span>Min: <span id="temp-min">--</span>°C</span>
+                            <span>Avg: <span id="temp-avg">--</span>°C</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card light-card">
+                    <div class="card-header">
+                        <h3>💡 Light Sensor</h3>
+                        <img src="assets/light.svg" alt="" onerror="this.style.display='none'">
+                    </div>
+                    <div class="card-body">
+                        <h2 id="light-value" class="value text-success">420 Lux</h2>
+                        <p class="status">Environment <span id="env-status">Bright</span></p>
+                        <p class="led-status">LED Status: <span id="led-status" class="badge badge-success">ON</span></p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="cards grid-2-col">
+                <div class="card control-panel">
+                    <h3>Control Panel</h3>
+                    <div class="control-group">
+                        <label>Mode</label>
+                        <div class="toggle-buttons" id="mode-buttons">
+                            <button class="btn active" data-mode="AUTO">AUTO</button>
+                            <button class="btn" data-mode="MANUAL">MANUAL</button>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label>Light</label>
+                        <div class="toggle-buttons" id="light-buttons">
+                            <button class="btn active" data-light="ON">ON</button>
+                            <button class="btn" data-light="OFF">OFF</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card alert-center">
+                    <h3>Alert Center</h3>
+                    <ul class="alert-list" id="alert-list">
+                        <li class="alert-item success">✓ System Normal</li>
+                        <!-- Alerts will be dynamically injected here -->
+                    </ul>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="js/api.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

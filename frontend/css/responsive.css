@@ -1,0 +1,45 @@
+@media (max-width: 992px) {
+    .grid-2-col {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        overflow: auto;
+    }
+    
+    .sidebar {
+        position: fixed;
+        left: -100%;
+        top: 0;
+        bottom: 0;
+        z-index: 1000;
+        background: var(--bg-card);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        transition: left 0.3s ease;
+        margin: 0;
+        border-radius: 0 20px 20px 0;
+        padding-top: 20px;
+        box-shadow: 4px 0 20px rgba(0,0,0,0.5);
+    }
+
+    .sidebar.open {
+        left: 0;
+    }
+
+    main {
+        padding: 16px;
+    }
+
+    .hamburger-menu {
+        display: block;
+    }
+    
+    .top-bar {
+        justify-content: flex-start;
+        gap: 20px;
+    }
+}
