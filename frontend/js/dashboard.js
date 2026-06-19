@@ -97,7 +97,7 @@ function updateToggleButtons(containerId, activeValue) {
 document.addEventListener('DOMContentLoaded', () => {
     const hamburger = document.getElementById('hamburger-menu');
     const sidebar = document.querySelector('.sidebar');
-    
+
     if (hamburger && sidebar) {
         hamburger.addEventListener('click', () => {
             sidebar.classList.toggle('open');
@@ -109,6 +109,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (window.innerWidth <= 768 && sidebar && sidebar.classList.contains('open') && e.target !== hamburger && !sidebar.contains(e.target)) {
             sidebar.classList.remove('open');
         }
+    });
+
+    // Navigation menu handler
+    const navLinks = document.querySelectorAll('.menu a');
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            navLinks.forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
+
+            // Close mobile sidebar
+            if (window.innerWidth <= 768 && sidebar) {
+                sidebar.classList.remove('open');
+            }
+        });
     });
 
     // Event listeners for controls
