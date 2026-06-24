@@ -4,6 +4,7 @@ const TEMP_THRESHOLD = 35; // Configurable threshold
 let tempHistory = [];
 let maxTemp = -Infinity;
 let minTemp = Infinity;
+const dismissedAlertIds = new Set();
 
 // Function to update the dashboard UI based on data
 function updateDashboard(data) {
@@ -22,6 +23,8 @@ function updateDashboard(data) {
         document.getElementById('temp-max').textContent = maxTemp.toFixed(1);
         document.getElementById('temp-min').textContent = minTemp.toFixed(1);
         document.getElementById('temp-avg').textContent = avgTemp;
+
+        updateAnalytics(maxTemp, minTemp, avgTemp, tempHistory.length);
     }
 
     // Update Temperature
@@ -35,7 +38,12 @@ function updateDashboard(data) {
         tempStatus.textContent = "High";
         tempStatus.className = "text-danger";
         tempValue.className = "value text-danger";
-        tempAlerts.push('<li class="alert-item danger">⚠ High Temperature Detected</li>');
+        tempAlerts.push({
+            id: 'high-temperature',
+            type: 'danger',
+            icon: '!',
+            message: 'High Temperature Detected'
+        });
     } else {
         tempStatus.textContent = "Normal";
         tempStatus.className = "text-cyan";
@@ -51,7 +59,12 @@ function updateDashboard(data) {
     
     if (data.lightLevel < 200) {
         envStatus.textContent = "Dark";
-        tempAlerts.push('<li class="alert-item warning">⚠ Low Light Detected</li>');
+        tempAlerts.push({
+            id: 'low-light',
+            type: 'warning',
+            icon: '!',
+            message: 'Low Light Detected'
+        });
     } else {
         envStatus.textContent = "Bright";
     }
@@ -70,12 +83,49 @@ function updateDashboard(data) {
     updateToggleButtons('light-buttons', data.lightStatus ? 'ON' : 'OFF');
 
     // Update Alerts
-    const alertList = document.getElementById('alert-list');
-    if (tempAlerts.length > 0) {
-        alertList.innerHTML = tempAlerts.join('');
-    } else {
-        alertList.innerHTML = '<li class="alert-item success">✓ System Normal</li>';
+    if (tempAlerts.length === 0) {
+        tempAlerts.push({
+            id: 'system-normal',
+            type: 'success',
+            icon: '✓',
+            message: 'System Normal'
+        });
     }
+
+    renderAlerts(tempAlerts);
+}
+
+function renderAlerts(alerts) {
+    const alertList = document.getElementById('alert-list');
+    if (!alertList) return;
+
+    const activeAlertIds = new Set(alerts.map(alert => alert.id));
+    dismissedAlertIds.forEach(id => {
+        if (!activeAlertIds.has(id)) dismissedAlertIds.delete(id);
+    });
+
+    const visibleAlerts = alerts.filter(alert => !dismissedAlertIds.has(alert.id));
+    alertList.innerHTML = visibleAlerts.map(alert => `
+        <li class="alert-item ${alert.type}" data-alert-id="${alert.id}">
+            <span class="alert-icon" aria-hidden="true">${alert.icon}</span>
+            <span class="alert-message">${alert.message}</span>
+            <button class="alert-close" type="button" aria-label="Close alert">×</button>
+        </li>
+    `).join('');
+}
+
+function updateAnalytics(maximum, minimum, average, readingCount) {
+    const analytics = {
+        'analytics-max': `${maximum.toFixed(1)}°C`,
+        'analytics-min': `${minimum.toFixed(1)}°C`,
+        'analytics-avg': `${average}°C`,
+        'analytics-readings': readingCount
+    };
+
+    Object.entries(analytics).forEach(([id, value]) => {
+        const element = document.getElementById(id);
+        if (element) element.textContent = value;
+    });
 }
 
 function updateToggleButtons(containerId, activeValue) {
@@ -111,6 +161,41 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeKey = 'smarthome-theme';
+
+    function setTheme(theme) {
+        const isDark = theme === 'dark';
+        document.documentElement.classList.toggle('dark', isDark);
+        if (themeToggle) {
+            themeToggle.textContent = isDark ? 'Use light mode' : 'Use dark mode';
+            themeToggle.setAttribute('aria-pressed', String(isDark));
+        }
+    }
+
+    setTheme(localStorage.getItem(themeKey) === 'dark' ? 'dark' : 'light');
+    if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+            const nextTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+            localStorage.setItem(themeKey, nextTheme);
+            setTheme(nextTheme);
+        });
+    }
+
+    const alertList = document.getElementById('alert-list');
+    if (alertList) {
+        alertList.addEventListener('click', (event) => {
+            const closeButton = event.target.closest('.alert-close');
+            if (!closeButton) return;
+
+            const alert = closeButton.closest('[data-alert-id]');
+            if (!alert) return;
+
+            dismissedAlertIds.add(alert.dataset.alertId);
+            alert.remove();
+        });
+    }
+
     // Navigation menu handler
     const navLinks = document.querySelectorAll('.menu a');
     navLinks.forEach(link => {
@@ -118,6 +203,12 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             navLinks.forEach(l => l.classList.remove('active'));
             link.classList.add('active');
+
+            const target = document.querySelector(link.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                history.replaceState(null, '', link.getAttribute('href'));
+            }
 
             // Close mobile sidebar
             if (window.innerWidth <= 768 && sidebar) {

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Home IoT Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/responsive.css">
@@ -14,14 +14,29 @@
         <aside class="sidebar card">
             <div class="logo">
                 <img src="assets/logo.svg" alt="Logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%238b5cf6\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\'></path><polyline points=\'9 22 9 12 15 12 15 22\'></polyline></svg>'">
-                <h2>SmartHome</h2>
+                <h2>SMART HOME</h2>
             </div>
             <nav class="menu">
-                <a href="#" class="active"><span>🏠</span> Dashboard</a>
-                <a href="#"><span>🌡</span> Temperature</a>
-                <a href="#"><span>💡</span> Smart Lighting</a>
-                <a href="#"><span>📊</span> Analytics</a>
-                <a href="#"><span>⚙</span> Settings</a>
+                <a href="#dashboard" class="active">
+                    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V10Z"/><path d="M9 21v-7h6v7"/></svg>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#temperature">
+                    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 14.8V5a4 4 0 1 0-8 0v9.8a6 6 0 1 0 8 0Z"/><path d="M10 5v11"/></svg>
+                    <span>Temperature</span>
+                </a>
+                <a href="#lighting">
+                    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.2 1 2V17h6v-.3c0-.8.4-1.5 1-2A7 7 0 0 0 12 2Z"/><path d="M4 4 2 2M20 4l2-2M3 12H1m22 0h-2"/></svg>
+                    <span>Smart Lighting</span>
+                </a>
+                <a href="#analytics">
+                    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9m6 10V5m6 14v-7m6 7V3"/></svg>
+                    <span>Analytics</span>
+                </a>
+                <a href="#settings">
+                    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.3 2.3-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5v.2h-3.2v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1-2.3-2.3.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H4.7v-3.2h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9L6 8l2.3-2.3.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.5v-.2h3.2v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 8l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1h.2v3.2h-.2a1.7 1.7 0 0 0-1.5 1Z"/></svg>
+                    <span>Settings</span>
+                </a>
             </nav>
         </aside>
 
@@ -34,7 +49,7 @@
                 </div>
             </header>
 
-            <section class="hero-card card gradient-bg">
+            <section id="dashboard" class="hero-card card gradient-bg">
                 <div class="hero-content">
                     <h1>Smart Home IoT System</h1>
                     <p>Temperature Monitoring & Smart Lighting Control</p>
@@ -46,7 +61,7 @@
             </section>
 
             <section class="cards grid-2-col">
-                <div class="card temp-card">
+                <div id="temperature" class="card temp-card">
                     <div class="card-header">
                         <h3>🌡 Temperature</h3>
                         <img src="assets/temperature.svg" alt="" onerror="this.style.display='none'">
@@ -62,7 +77,7 @@
                     </div>
                 </div>
 
-                <div class="card light-card">
+                <div id="lighting" class="card light-card">
                     <div class="card-header">
                         <h3>💡 Light Sensor</h3>
                         <img src="assets/light.svg" alt="" onerror="this.style.display='none'">
@@ -97,9 +112,40 @@
                 <div class="card alert-center">
                     <h3>Alert Center</h3>
                     <ul class="alert-list" id="alert-list">
-                        <li class="alert-item success">✓ System Normal</li>
+                        <li class="alert-item success">
+                            <span class="alert-icon" aria-hidden="true">✓</span>
+                            <span class="alert-message">System Normal</span>
+                            <button class="alert-close" type="button" aria-label="Close alert">×</button>
+                        </li>
                         <!-- Alerts will be dynamically injected here -->
                     </ul>
+                </div>
+            </section>
+
+            <section id="analytics" class="cards grid-2-col">
+                <div class="card analytics-card">
+                    <div class="card-header">
+                        <h3>Temperature Analytics</h3>
+                        <span class="section-icon" aria-hidden="true">↗</span>
+                    </div>
+                    <div class="analytics-grid">
+                        <div class="metric"><span>Maximum</span><strong id="analytics-max">--°C</strong></div>
+                        <div class="metric"><span>Minimum</span><strong id="analytics-min">--°C</strong></div>
+                        <div class="metric"><span>Average</span><strong id="analytics-avg">--°C</strong></div>
+                        <div class="metric"><span>Readings</span><strong id="analytics-readings">0</strong></div>
+                    </div>
+                </div>
+
+                <div id="settings" class="card settings-card">
+                    <h3>Settings</h3>
+                    <p>Choose how the dashboard looks on this browser.</p>
+                    <div class="setting-row">
+                        <div>
+                            <strong>Dark mode</strong>
+                            <span>Switch between light and dark appearance</span>
+                        </div>
+                        <button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false">Use dark mode</button>
+                    </div>
                 </div>
             </section>
         </main>
