@@ -1,0 +1,14 @@
+{
+  "name": "iot102-smart-environment",
+  "version": "1.0.0",
+  "description": "Smart Environment Monitoring and Lighting Control System",
+  "private": true,
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "node backend/server.js",
+    "test": "node --test backend/tests/*.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

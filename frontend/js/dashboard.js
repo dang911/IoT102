@@ -1,4 +1,4 @@
-const TEMP_THRESHOLD = 35; // Configurable threshold
+const DEFAULT_TEMP_THRESHOLD = 35;
 
 // Variables to track temperature history
 let tempHistory = [];
@@ -10,9 +10,20 @@ const dismissedAlertIds = new Set();
 function updateDashboard(data) {
     if (!data) return;
 
+    const tempThreshold = data.thresholds?.temperature ?? DEFAULT_TEMP_THRESHOLD;
+    const darkThreshold = data.thresholds?.dark ?? 200;
+
     // Update Temperature History
     const currentTemp = parseFloat(data.temperature);
-    if (!isNaN(currentTemp)) {
+    if (Number.isNaN(currentTemp)) {
+        return;
+    }
+
+    if (data.metrics && data.metrics.sampleCount > 0) {
+        document.getElementById('temp-max').textContent = Number(data.metrics.maxTemperature).toFixed(1);
+        document.getElementById('temp-min').textContent = Number(data.metrics.minTemperature).toFixed(1);
+        document.getElementById('temp-avg').textContent = Number(data.metrics.avgTemperature).toFixed(1);
+    } else {
         tempHistory.push(currentTemp);
         if (currentTemp > maxTemp) maxTemp = currentTemp;
         if (currentTemp < minTemp) minTemp = currentTemp;
@@ -34,7 +45,8 @@ function updateDashboard(data) {
     
     tempValue.textContent = `${currentTemp.toFixed(1)}°C`;
     
-    if (currentTemp > TEMP_THRESHOLD) {
+    const temperatureHigh = data.alerts?.temperatureHigh ?? currentTemp > tempThreshold;
+    if (temperatureHigh) {
         tempStatus.textContent = "High";
         tempStatus.className = "text-danger";
         tempValue.className = "value text-danger";
@@ -55,9 +67,11 @@ function updateDashboard(data) {
     const envStatus = document.getElementById('env-status');
     const ledStatus = document.getElementById('led-status');
     
-    lightValue.textContent = `${data.lightLevel} Lux`;
+    const lightLevel = Number(data.lightLevel);
+    lightValue.textContent = `${lightLevel} Lux`;
     
-    if (data.lightLevel < 200) {
+    const lowLight = data.alerts?.lowLight ?? lightLevel < darkThreshold;
+    if (lowLight) {
         envStatus.textContent = "Dark";
         tempAlerts.push({
             id: 'low-light',
@@ -220,10 +234,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event listeners for controls
     const modeButtons = document.querySelectorAll('#mode-buttons .btn');
     modeButtons.forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', async (e) => {
             const mode = e.target.dataset.mode;
             if(window.api && window.api.setMode) {
-                window.api.setMode(mode);
+                const updated = await window.api.setMode(mode);
+                if (updated) {
+                    updateDashboard(updated);
+                    return;
+                }
             }
             updateToggleButtons('mode-buttons', mode);
         });
@@ -231,10 +249,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const lightButtons = document.querySelectorAll('#light-buttons .btn');
     lightButtons.forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', async (e) => {
             const status = e.target.dataset.light;
             if(window.api && window.api.setLight) {
-                window.api.setLight(status);
+                const updated = await window.api.setLight(status);
+                if (updated) {
+                    updateDashboard(updated);
+                    return;
+                }
             }
             updateToggleButtons('light-buttons', status);
         });
