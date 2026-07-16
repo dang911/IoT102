@@ -1,5 +1,9 @@
 # ESP32 IoT Gateway Firmware
 
+> **LEGACY:** Thư mục này mô tả kiến trúc Arduino UNO → ESP32 gateway và chỉ
+> được giữ để tham khảo/tương thích. Firmware chính của dự án là
+> `firmware/SmartEnvironmentBackend`, nơi ESP32 đọc cảm biến trực tiếp.
+
 ## 🔧 Cài đặt & Hướng dẫn Upload
 
 ### 1. Cài Arduino IDE

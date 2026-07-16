@@ -1,24 +1,196 @@
 {
+  "schemaVersion": 2,
   "mode": "AUTO",
   "lightStatus": false,
   "config": {
     "temperatureThreshold": 35,
     "darkThreshold": 200,
     "brightThreshold": 260,
-    "historyLimit": 240
+    "historyLimit": 240,
+    "notificationLimit": 500,
+    "notificationCooldownMs": 300000,
+    "sensorOfflineTimeoutMs": 60000,
+    "forecastWindowSize": 12,
+    "forecastMinSamples": 4,
+    "forecastHorizonMinutes": 15,
+    "dustThresholds": {
+      "moderate": 50,
+      "high": 150,
+      "dangerous": 300
+    },
+    "dustCalibration": {
+      "cleanAirVoltage": 0.9,
+      "sensitivity": 0.005,
+      "calibrationFactor": 1,
+      "offsetUgM3": 0,
+      "calibrated": false,
+      "adcReferenceVoltage": 3.3,
+      "adcMax": 4095,
+      "voltageDividerRatio": 0.545455,
+      "maxSensorVoltage": 5.1
+    }
   },
   "latest": {
     "temperature": 28,
     "lightLevel": 420,
+    "dust": {
+      "rawAdc": null,
+      "adcVoltage": null,
+      "voltage": null,
+      "density": null,
+      "unit": "ug/m3",
+      "level": "UNKNOWN",
+      "classification": "INTERNAL_PROJECT_THRESHOLDS_NOT_AQI",
+      "disclaimer": "Mật độ bụi ước tính – chỉ dùng cho mục đích học tập và theo dõi xu hướng.",
+      "sensorOnline": false,
+      "calibrated": false,
+      "lastUpdate": "2026-06-17T06:19:15.063Z",
+      "valid": false,
+      "abnormal": false,
+      "saturated": false,
+      "error": "NO_DATA"
+    },
+    "sensors": {
+      "temperature": {
+        "online": true,
+        "abnormal": false,
+        "lastUpdate": "2026-06-17T06:19:15.063Z",
+        "error": null
+      },
+      "light": {
+        "online": true,
+        "abnormal": false,
+        "lastUpdate": "2026-06-17T06:19:15.063Z",
+        "error": null
+      }
+    },
     "timestamp": "2026-06-17T06:19:15.063Z",
-    "source": "api"
+    "source": "api",
+    "dataMode": "REAL"
   },
   "history": [
     {
       "temperature": 28,
       "lightLevel": 420,
+      "dust": {
+        "rawAdc": null,
+        "adcVoltage": null,
+        "voltage": null,
+        "density": null,
+        "unit": "ug/m3",
+        "level": "UNKNOWN",
+        "classification": "INTERNAL_PROJECT_THRESHOLDS_NOT_AQI",
+        "disclaimer": "Mật độ bụi ước tính – chỉ dùng cho mục đích học tập và theo dõi xu hướng.",
+        "sensorOnline": false,
+        "calibrated": false,
+        "lastUpdate": "2026-06-17T06:19:15.063Z",
+        "valid": false,
+        "abnormal": false,
+        "saturated": false,
+        "error": "NO_DATA"
+      },
+      "sensors": {
+        "temperature": {
+          "online": true,
+          "abnormal": false,
+          "lastUpdate": "2026-06-17T06:19:15.063Z",
+          "error": null
+        },
+        "light": {
+          "online": true,
+          "abnormal": false,
+          "lastUpdate": "2026-06-17T06:19:15.063Z",
+          "error": null
+        }
+      },
       "timestamp": "2026-06-17T06:19:15.063Z",
-      "source": "api"
+      "source": "api",
+      "dataMode": "REAL",
+      "mode": "AUTO",
+      "lightStatus": false
+    }
+  ],
+  "notifications": [
+    {
+      "id": "notification-000001",
+      "type": "DUST_SENSOR_OFFLINE",
+      "severity": "WARNING",
+      "title": "Cảm biến bụi mất dữ liệu",
+      "message": "Không nhận được dữ liệu hợp lệ mới từ cảm biến bụi.",
+      "value": null,
+      "threshold": 60000,
+      "timestamp": "2026-07-15T06:59:47.296Z",
+      "read": false,
+      "source": "backend"
+    }
+  ],
+  "alertStates": {
+    "temperatureHigh": {
+      "active": false,
+      "stateToken": null,
+      "lastNotificationAt": null,
+      "lastEvaluatedAt": "2026-07-15T07:02:33.602Z"
+    },
+    "lowLight": {
+      "active": false,
+      "stateToken": null,
+      "lastNotificationAt": null,
+      "lastEvaluatedAt": "2026-07-15T07:02:33.602Z"
+    },
+    "dustHigh": {
+      "active": false,
+      "stateToken": null,
+      "lastNotificationAt": null,
+      "lastEvaluatedAt": "2026-07-15T07:02:33.602Z"
+    },
+    "dustSensorOffline": {
+      "active": true,
+      "stateToken": "NO_DATA",
+      "lastNotificationAt": "2026-07-15T06:59:47.296Z",
+      "lastEvaluatedAt": "2026-07-15T07:02:33.602Z"
+    },
+    "sensorAbnormal": {
+      "active": false,
+      "stateToken": null,
+      "lastNotificationAt": null,
+      "lastEvaluatedAt": "2026-07-15T07:02:33.602Z"
+    },
+    "esp32Offline": {
+      "active": false,
+      "stateToken": null,
+      "lastNotificationAt": null,
+      "lastEvaluatedAt": "2026-07-15T07:02:33.602Z"
+    },
+    "environmentDegraded": {
+      "active": false,
+      "stateToken": null,
+      "lastNotificationAt": null,
+      "lastEvaluatedAt": "2026-07-15T07:02:33.602Z"
+    }
+  },
+  "nextNotificationId": 2,
+  "connection": {
+    "enabled": false,
+    "esp32Online": null,
+    "lastSeen": null,
+    "lastError": null
+  },
+  "system": {
+    "startedAt": "2026-07-15T06:47:59.399Z",
+    "disconnectCount": 0,
+    "sensorDisconnectCount": 0,
+    "esp32DisconnectCount": 0
+  },
+  "sensorConnectionStates": {
+    "temperature": false,
+    "light": false,
+    "dust": false
+  },
+  "lightEvents": [
+    {
+      "timestamp": "2026-07-15T06:47:59.399Z",
+      "status": false,
+      "source": "simulation"
     }
   ]
 }

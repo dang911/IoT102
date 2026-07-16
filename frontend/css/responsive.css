@@ -1,43 +1,324 @@
-@media (max-width: 992px) {
-    .grid-2-col {
+@media (max-width: 1280px) {
+    .sensor-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dust-card {
+        grid-column: 1 / -1;
+    }
+
+    .charts-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .chart-card:last-child {
+        grid-column: 1 / -1;
+    }
+
+    .report-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 1050px) {
+    .sidebar {
+        flex-basis: 220px;
+        width: 220px;
+        margin-right: 14px;
+    }
+
+    .logo strong {
+        font-size: 0.92rem;
+    }
+
+    .menu a {
+        font-size: 0.84rem;
+        padding-inline: 10px;
+    }
+
+    .control-health-grid,
+    .settings-grid {
         grid-template-columns: 1fr;
+    }
+
+    .forecast-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .environment-forecast-card {
+        grid-column: 1 / -1;
     }
 }
 
 @media (max-width: 768px) {
-    .container {
-        flex-direction: column;
-        overflow: auto;
+    html {
+        scroll-padding-top: 84px;
     }
-    
+
+    body {
+        overflow-x: hidden;
+    }
+
+    .container {
+        display: block;
+    }
+
     .sidebar {
         position: fixed;
-        left: -100%;
         top: 0;
         bottom: 0;
+        left: 0;
         z-index: 1000;
-        background: var(--sidebar);
-        transition: left 0.3s ease;
+        width: min(290px, calc(100vw - 54px));
+        height: 100vh;
+        height: 100dvh;
         margin: 0;
-        border-radius: 0 20px 20px 0;
-        padding-top: 20px;
-        box-shadow: 4px 0 20px rgba(0,0,0,0.18);
+        border-width: 0 1px 0 0;
+        border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+        box-shadow: var(--shadow-hover);
+        transform: translateX(-105%);
+        transition: transform 0.25s ease;
     }
 
     .sidebar.open {
-        left: 0;
+        transform: translateX(0);
+    }
+
+    .sidebar-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 900;
+        display: block;
+        border: 0;
+        background: rgba(4, 9, 18, 0.54);
+        cursor: pointer;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+    }
+
+    .sidebar-overlay.visible {
+        opacity: 1;
+        pointer-events: auto;
     }
 
     main {
-        padding: 16px;
+        width: 100%;
+        height: auto;
+        min-height: 100vh;
+        min-height: 100dvh;
+        overflow: visible;
+        padding: 12px;
+    }
+
+    .top-bar {
+        top: 8px;
+        min-height: 64px;
+        margin-bottom: 2px;
+        padding: 10px 12px;
     }
 
     .hamburger-menu {
-        display: block;
+        display: grid;
     }
-    
+
+    .user-info > span {
+        display: none;
+    }
+
+    .avatar {
+        width: 34px;
+        height: 34px;
+    }
+
+    .hero-card {
+        min-height: 220px;
+    }
+
+    .hero-card::after {
+        right: -60px;
+        opacity: 0.55;
+    }
+
+    .section-block {
+        scroll-margin-top: 82px;
+    }
+
+    .sensor-grid,
+    .charts-grid,
+    .forecast-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dust-card,
+    .chart-card:last-child,
+    .environment-forecast-card {
+        grid-column: auto;
+    }
+
+    .report-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    main {
+        gap: 16px;
+        padding: 8px;
+    }
+
+    .card {
+        border-radius: var(--radius);
+        padding: 18px;
+    }
+
     .top-bar {
-        justify-content: flex-start;
-        gap: 20px;
+        gap: 8px;
+        padding: 9px;
+    }
+
+    .system-badges {
+        min-width: 0;
+        flex: 1;
+        gap: 5px;
+    }
+
+    .system-badges .badge {
+        max-width: 50%;
+        overflow: hidden;
+        padding-inline: 7px;
+        text-overflow: ellipsis;
+    }
+
+    .user-info {
+        margin-left: 0;
+    }
+
+    .hero-card {
+        padding: 26px 20px;
+    }
+
+    .hero-content h1 {
+        font-size: 1.75rem;
+    }
+
+    .hero-meta {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .section-heading,
+    .section-heading.inside-card {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .section-heading > button,
+    .section-heading .action-row {
+        width: 100%;
+    }
+
+    .action-row {
+        align-items: stretch;
+        flex-wrap: wrap;
+    }
+
+    .action-row > .secondary-button {
+        flex: 1;
+    }
+
+    .analytics-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .notification-item {
+        flex-wrap: wrap;
+        padding: 12px;
+    }
+
+    .notification-content {
+        width: calc(100% - 42px);
+    }
+
+    .mark-read-button {
+        margin-left: 40px;
+    }
+
+    .report-notes-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .checkbox-label {
+        grid-column: auto;
+    }
+
+    .form-actions,
+    .setting-row {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .form-actions .primary-button,
+    .theme-toggle {
+        width: 100%;
+    }
+}
+
+@media (max-width: 420px) {
+    .avatar {
+        display: none;
+    }
+
+    .system-badges .badge {
+        font-size: 0.66rem;
+    }
+
+    .hero-content h1 {
+        font-size: 1.55rem;
+    }
+
+    .sensor-title-row {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .value {
+        font-size: 2rem;
+    }
+
+    .dust-details,
+    .report-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .period-switch {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .action-row > * {
+        width: 100%;
+    }
+
+    .action-row .icon-button {
+        width: 100%;
+    }
+
+    .notification-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .toast {
+        right: 10px;
+        bottom: 10px;
+        left: 10px;
+        max-width: none;
     }
 }

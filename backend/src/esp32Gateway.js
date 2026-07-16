@@ -27,7 +27,14 @@ class Esp32Gateway {
       });
 
       const text = await response.text();
-      const data = text ? JSON.parse(text) : {};
+      let data = {};
+      if (text) {
+        try {
+          data = JSON.parse(text);
+        } catch (error) {
+          throw new Error('ESP32 returned invalid JSON');
+        }
+      }
 
       if (!response.ok) {
         throw new Error(data.error || `ESP32 returned HTTP ${response.status}`);

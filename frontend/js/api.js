@@ -1,124 +1,245 @@
-const urlParams = new URLSearchParams(window.location.search);
-const configuredApi =
-    window.API_BASE_URL ||
-    urlParams.get("api") ||
-    localStorage.getItem("API_BASE_URL") ||
-    "";
+(function createApiClient(window) {
+    'use strict';
 
-if (urlParams.get("api")) {
-    localStorage.setItem("API_BASE_URL", urlParams.get("api"));
-}
+    const urlParams = new URLSearchParams(window.location.search);
 
-const API = configuredApi.replace(/\/+$/, "");
-
-function apiUrl(path) {
-    return `${API}${path}`;
-}
-
-function createTimeoutSignal(timeoutMs = 3000) {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), timeoutMs);
-
-    return {
-        signal: controller.signal,
-        clear: () => clearTimeout(timeout)
-    };
-}
-
-function mockStatus() {
-    const lightLevel = Math.floor(100 + Math.random() * 800);
-    const temperature = Number((20 + Math.random() * 20).toFixed(1));
-    const lowLight = lightLevel < 200;
-    const temperatureHigh = temperature > 35;
-
-    return {
-        temperature,
-        lightLevel,
-        lightStatus: Math.random() > 0.5,
-        mode: Math.random() > 0.5 ? "AUTO" : "MANUAL",
-        status: {
-            temperature: temperatureHigh ? "HIGH" : "NORMAL",
-            environment: lowLight ? "DARK" : "BRIGHT"
-        },
-        alerts: {
-            temperatureHigh,
-            lowLight
-        },
-        thresholds: {
-            temperature: 35,
-            dark: 200,
-            bright: 260
+    function readStorage(key) {
+        try {
+            return window.localStorage.getItem(key);
+        } catch (_error) {
+            return null;
         }
-    };
-}
+    }
 
-async function requestJson(path, options = {}) {
-    const timeout = createTimeoutSignal(options.timeoutMs);
+    function writeStorage(key, value) {
+        try {
+            window.localStorage.setItem(key, value);
+        } catch (_error) {
+            // Storage can be unavailable in private browsing or an embedded WebView.
+        }
+    }
 
-    try {
-        const res = await fetch(apiUrl(path), {
-            ...options,
-            signal: timeout.signal,
-            headers: {
-                "Content-Type": "application/json",
-                ...(options.headers || {})
+    const queryApi = urlParams.get('api');
+    if (queryApi) writeStorage('API_BASE_URL', queryApi);
+
+    const configuredApi =
+        window.API_BASE_URL ||
+        queryApi ||
+        readStorage('API_BASE_URL') ||
+        '';
+    const API_BASE_URL = String(configuredApi).replace(/\/+$/, '');
+
+    class ApiError extends Error {
+        constructor(message, details = {}) {
+            super(message);
+            this.name = 'ApiError';
+            this.status = details.status || 0;
+            this.path = details.path || '';
+            this.code = details.code || 'API_ERROR';
+            this.payload = details.payload;
+            this.cause = details.cause;
+        }
+
+        get endpointUnavailable() {
+            return this.status === 404 || this.status === 405 || this.status === 501;
+        }
+
+        get connectionFailure() {
+            return this.code === 'NETWORK_ERROR' || this.code === 'TIMEOUT';
+        }
+    }
+
+    function apiUrl(path, query = undefined) {
+        const url = `${API_BASE_URL}${path}`;
+        if (!query) return url;
+
+        const params = new URLSearchParams();
+        Object.entries(query).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && value !== '') {
+                params.set(key, String(value));
             }
         });
+        const suffix = params.toString();
+        return suffix ? `${url}?${suffix}` : url;
+    }
 
-        if (!res.ok) {
-            const errorText = await res.text();
-            throw new Error(errorText || "Network response was not ok");
+    async function request(path, options = {}) {
+        const {
+            timeoutMs = 5000,
+            query,
+            responseType = 'json',
+            headers = {},
+            ...fetchOptions
+        } = options;
+        const controller = new AbortController();
+        const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
+
+        try {
+            let response;
+            try {
+                response = await window.fetch(apiUrl(path, query), {
+                    ...fetchOptions,
+                    signal: controller.signal,
+                    headers: {
+                        Accept: responseType === 'text' ? 'text/plain, text/csv, application/json' : 'application/json',
+                        ...(fetchOptions.body !== undefined ? { 'Content-Type': 'application/json' } : {}),
+                        ...headers
+                    }
+                });
+            } catch (error) {
+                if (error && error.name === 'AbortError') {
+                    throw new ApiError(`Request timed out after ${timeoutMs} ms`, {
+                        path,
+                        code: 'TIMEOUT',
+                        cause: error
+                    });
+                }
+                throw new ApiError('Cannot connect to the API', {
+                    path,
+                    code: 'NETWORK_ERROR',
+                    cause: error
+                });
+            }
+
+            const raw = response.status === 204 ? '' : await response.text();
+            let payload = null;
+            if (raw) {
+                const contentType = response.headers.get('content-type') || '';
+                if (responseType === 'text' && !contentType.includes('application/json')) {
+                    payload = raw;
+                } else {
+                    try {
+                        payload = JSON.parse(raw);
+                    } catch (error) {
+                        if (response.ok && responseType === 'text') {
+                            payload = raw;
+                        } else {
+                            throw new ApiError('API returned invalid JSON', {
+                                path,
+                                status: response.status,
+                                code: 'INVALID_RESPONSE',
+                                cause: error
+                            });
+                        }
+                    }
+                }
+            }
+
+            if (!response.ok) {
+                const message =
+                    (payload && (payload.error || payload.message)) ||
+                    `Request failed with HTTP ${response.status}`;
+                throw new ApiError(message, {
+                    path,
+                    status: response.status,
+                    code: 'HTTP_ERROR',
+                    payload
+                });
+            }
+
+            return payload;
+        } finally {
+            window.clearTimeout(timeoutId);
         }
-
-        return await res.json();
-    } finally {
-        timeout.clear();
     }
-}
 
-// Lấy dữ liệu
-async function getStatus() {
-    try {
-        return await requestJson("/api/status", { timeoutMs: 3000 });
-    } catch (error) {
-        // Fallback to mock data so the dashboard still works for demo without ESP32
-        console.warn("Using mock dashboard data:", error.message);
-        return mockStatus();
+    function getStatus() {
+        return request('/api/status', { timeoutMs: 4000 });
     }
-}
 
-// Gửi lệnh điều khiển mode
-async function setMode(mode) {
-    console.log(`Setting mode to: ${mode}`);
-    try {
-        return await requestJson("/api/mode", {
-            method: "POST",
+    function setMode(mode) {
+        return request('/api/mode', {
+            method: 'POST',
             body: JSON.stringify({ mode }),
-            timeoutMs: 3000
+            timeoutMs: 5000
         });
-    } catch (error) {
-        console.error("Failed to set mode:", error);
-        return null;
     }
-}
 
-// Gửi lệnh điều khiển đèn
-async function setLight(status) {
-    console.log(`Setting light to: ${status}`);
-    try {
-        return await requestJson("/api/light", {
-            method: "POST",
+    function setLight(status) {
+        return request('/api/light', {
+            method: 'POST',
             body: JSON.stringify({ status }),
-            timeoutMs: 3000
+            timeoutMs: 5000
         });
-    } catch (error) {
-        console.error("Failed to set light:", error);
-        return null;
     }
-}
 
-window.api = {
-    getStatus,
-    setMode,
-    setLight
-};
+    function getHistory(limit = 180) {
+        return request('/api/history', {
+            query: { limit },
+            timeoutMs: 7000
+        });
+    }
+
+    function getNotifications(limit = 50) {
+        return request('/api/notifications', {
+            query: { limit },
+            timeoutMs: 6000
+        });
+    }
+
+    function markNotificationRead(id) {
+        return request(`/api/notifications/${encodeURIComponent(id)}/read`, {
+            method: 'PATCH',
+            body: JSON.stringify({ read: true }),
+            timeoutMs: 5000
+        });
+    }
+
+    function getForecast() {
+        return request('/api/forecast', { timeoutMs: 7000 });
+    }
+
+    function getReport(period = 'daily') {
+        return request('/api/reports', {
+            query: { period },
+            timeoutMs: 10000
+        });
+    }
+
+    function getReportCsv(period = 'daily') {
+        return request('/api/reports', {
+            query: { period, format: 'csv' },
+            responseType: 'text',
+            timeoutMs: 10000,
+            headers: { Accept: 'text/csv, text/plain, application/json' }
+        });
+    }
+
+    function getConfig() {
+        return request('/api/config', { timeoutMs: 5000 });
+    }
+
+    function updateConfig(config) {
+        return request('/api/config', {
+            method: 'PATCH',
+            body: JSON.stringify(config),
+            timeoutMs: 7000
+        });
+    }
+
+    function describeError(error) {
+        if (!(error instanceof ApiError)) return 'Unexpected dashboard error';
+        if (error.endpointUnavailable) return 'This API endpoint is not available on the connected device.';
+        if (error.code === 'TIMEOUT') return 'The API did not respond in time.';
+        if (error.code === 'NETWORK_ERROR') return 'The dashboard cannot reach the API.';
+        return error.message;
+    }
+
+    window.api = Object.freeze({
+        ApiError,
+        baseUrl: API_BASE_URL,
+        describeError,
+        getConfig,
+        getForecast,
+        getHistory,
+        getNotifications,
+        getReport,
+        getReportCsv,
+        getStatus,
+        markNotificationRead,
+        request,
+        setLight,
+        setMode,
+        updateConfig
+    });
+})(window);

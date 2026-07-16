@@ -6,6 +6,7 @@ const { URL } = require('node:url');
 const { buildStatus, HttpError } = require('./domain');
 const { Esp32Gateway } = require('./esp32Gateway');
 const { JsonStore } = require('./jsonStore');
+const { reportToCsv } = require('./reports');
 
 const MIME_TYPES = {
   '.css': 'text/css; charset=utf-8',
@@ -34,6 +35,17 @@ function sendNoContent(response) {
     'access-control-allow-methods': 'GET,POST,PATCH,DELETE,OPTIONS'
   });
   response.end();
+}
+
+function sendText(response, statusCode, payload, contentType, headers = {}) {
+  response.writeHead(statusCode, {
+    'access-control-allow-origin': '*',
+    'access-control-allow-headers': 'content-type',
+    'access-control-allow-methods': 'GET,POST,PATCH,DELETE,OPTIONS',
+    'content-type': contentType,
+    ...headers
+  });
+  response.end(payload);
 }
 
 function parseJsonBody(request) {
@@ -78,6 +90,20 @@ function parseLimit(searchParams) {
   return Math.min(Math.round(limit), 5000);
 }
 
+function parseOptionalBoolean(searchParams, name) {
+  const value = searchParams.get(name);
+  if (value === null || value === '') {
+    return undefined;
+  }
+  if (value === 'true' || value === '1') {
+    return true;
+  }
+  if (value === 'false' || value === '0') {
+    return false;
+  }
+  throw new HttpError(400, `${name} must be true or false`);
+}
+
 function withHardware(payload, hardwareResult) {
   if (!hardwareResult) {
     return payload;
@@ -89,14 +115,20 @@ function withHardware(payload, hardwareResult) {
   };
 }
 
-async function safeHardware(action) {
+async function safeHardware(action, { onSuccess, onError } = {}) {
   try {
     const result = await action();
+    if (onSuccess) {
+      onSuccess(result);
+    }
     return {
       synced: true,
       response: result
     };
   } catch (error) {
+    if (onError) {
+      onError(error);
+    }
     return {
       synced: false,
       warning: error.message
@@ -138,7 +170,8 @@ function createApp(options = {}) {
     new JsonStore({
       dataFile:
         options.dataFile || path.join(rootDir, 'backend', 'data', 'state.json'),
-      config: options.config || {}
+      config: options.config || {},
+      clock: options.clock
     });
   const gateway =
     options.gateway ||
@@ -148,14 +181,37 @@ function createApp(options = {}) {
     });
   const syncFromEsp32 = Boolean(options.syncFromEsp32);
 
+  if (typeof store.setEsp32Enabled === 'function') {
+    store.setEsp32Enabled(gateway.enabled);
+  }
+
   async function maybeSyncFromEsp32() {
     if (!syncFromEsp32 || !gateway.enabled) {
       return;
     }
 
-    const remoteStatus = await gateway.readStatus();
-    store.mergeRemoteStatus(remoteStatus, 'esp32');
+    try {
+      const remoteStatus = await gateway.readStatus();
+      store.mergeRemoteStatus(remoteStatus, 'esp32');
+    } catch (error) {
+      if (typeof store.markEsp32Offline === 'function') {
+        store.markEsp32Offline(error.message);
+      }
+    }
   }
+
+  const hardwareCallbacks = {
+    onSuccess: () => {
+      if (typeof store.markEsp32Online === 'function') {
+        store.markEsp32Online();
+      }
+    },
+    onError: (error) => {
+      if (typeof store.markEsp32Offline === 'function') {
+        store.markEsp32Offline(error.message);
+      }
+    }
+  };
 
   return http.createServer(async (request, response) => {
     const url = new URL(request.url, 'http://localhost');
@@ -178,6 +234,9 @@ function createApp(options = {}) {
 
       if (url.pathname === '/api/status' && request.method === 'GET') {
         await maybeSyncFromEsp32();
+        if (typeof store.refreshNotifications === 'function') {
+          store.refreshNotifications();
+        }
         sendJson(response, 200, store.status());
         return;
       }
@@ -210,7 +269,10 @@ function createApp(options = {}) {
         const body = await parseJsonBody(request);
         const status = store.setMode(body.mode);
         const hardware = gateway.enabled
-          ? await safeHardware(() => gateway.setMode(status.mode))
+          ? await safeHardware(
+            () => gateway.setMode(status.mode),
+            hardwareCallbacks
+          )
           : null;
         sendJson(response, 200, withHardware(status, hardware));
         return;
@@ -220,9 +282,57 @@ function createApp(options = {}) {
         const body = await parseJsonBody(request);
         const status = store.setLightStatus(body.status ?? body.lightStatus);
         const hardware = gateway.enabled
-          ? await safeHardware(() => gateway.setLight(status.lightStatus))
+          ? await safeHardware(
+            () => gateway.setLight(status.lightStatus),
+            hardwareCallbacks
+          )
           : null;
         sendJson(response, 200, withHardware(status, hardware));
+        return;
+      }
+
+      if (url.pathname === '/api/notifications' && request.method === 'GET') {
+        store.refreshNotifications();
+        const read = parseOptionalBoolean(url.searchParams, 'read');
+        sendJson(
+          response,
+          200,
+          store.notificationSummary(parseLimit(url.searchParams), read)
+        );
+        return;
+      }
+
+      const notificationReadMatch = url.pathname.match(
+        /^\/api\/notifications\/([^/]+)\/read$/
+      );
+      if (notificationReadMatch && request.method === 'PATCH') {
+        const id = decodeURIComponent(notificationReadMatch[1]);
+        sendJson(response, 200, store.markNotificationRead(id));
+        return;
+      }
+
+      if (url.pathname === '/api/forecast' && request.method === 'GET') {
+        sendJson(response, 200, store.forecast());
+        return;
+      }
+
+      if (url.pathname === '/api/reports' && request.method === 'GET') {
+        const period = String(url.searchParams.get('period') || 'daily').toLowerCase();
+        if (!['daily', 'weekly'].includes(period)) {
+          throw new HttpError(400, 'period must be daily or weekly');
+        }
+        const report = store.report(period);
+        const format = String(url.searchParams.get('format') || 'json').toLowerCase();
+        if (format === 'csv') {
+          sendText(response, 200, reportToCsv(report), 'text/csv; charset=utf-8', {
+            'content-disposition': `attachment; filename="environment-${period}.csv"`
+          });
+          return;
+        }
+        if (format !== 'json') {
+          throw new HttpError(400, 'format must be json or csv');
+        }
+        sendJson(response, 200, report);
         return;
       }
 

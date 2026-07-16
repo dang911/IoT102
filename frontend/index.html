@@ -3,130 +3,228 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Home IoT Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="color-scheme" content="light dark">
+    <title>Smart Environment Monitoring &amp; Lighting Control</title>
+    <script>
+        try {
+            if (localStorage.getItem('smarthome-theme') === 'dark') {
+                document.documentElement.classList.add('dark');
+            }
+        } catch (_error) {
+            // Keep the default theme when storage is unavailable.
+        }
+    </script>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/responsive.css">
 </head>
 <body>
+    <a class="skip-link" href="#main-content">Skip to dashboard content</a>
+
     <div class="container">
-        <aside class="sidebar card">
+        <aside id="sidebar" class="sidebar card" aria-label="Primary navigation">
             <div class="logo">
-                <img src="assets/logo.svg" alt="Logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%238b5cf6\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\'></path><polyline points=\'9 22 9 12 15 12 15 22\'></polyline></svg>'">
-                <h2>SMART HOME</h2>
+                <img src="assets/logo.svg" alt="" width="32" height="32">
+                <div>
+                    <strong>SMART ENV</strong>
+                    <span>IoT monitoring</span>
+                </div>
             </div>
+
             <nav class="menu">
-                <a href="#dashboard" class="active">
+                <a href="#dashboard" class="active" aria-current="page">
                     <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V10Z"/><path d="M9 21v-7h6v7"/></svg>
-                    <span>Dashboard</span>
+                    <span>Overview</span>
                 </a>
-                <a href="#temperature">
-                    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 14.8V5a4 4 0 1 0-8 0v9.8a6 6 0 1 0 8 0Z"/><path d="M10 5v11"/></svg>
-                    <span>Temperature</span>
+                <a href="#sensors">
+                    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 14.8V5a4 4 0 1 0-8 0v9.8a6 6 0 1 0 8 0Z"/><path d="M10 5v11"/><path d="M18 8h3m-1.5-1.5v3"/></svg>
+                    <span>Sensors</span>
                 </a>
-                <a href="#lighting">
-                    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.2 1 2V17h6v-.3c0-.8.4-1.5 1-2A7 7 0 0 0 12 2Z"/><path d="M4 4 2 2M20 4l2-2M3 12H1m22 0h-2"/></svg>
-                    <span>Smart Lighting</span>
+                <a href="#history">
+                    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-7"/></svg>
+                    <span>History</span>
                 </a>
-                <a href="#analytics">
+                <a href="#notifications">
+                    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>
+                    <span>Notifications</span>
+                    <span id="nav-unread-count" class="nav-count" hidden>0</span>
+                </a>
+                <a href="#forecast">
                     <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9m6 10V5m6 14v-7m6 7V3"/></svg>
-                    <span>Analytics</span>
+                    <span>Forecast</span>
+                </a>
+                <a href="#reports">
+                    <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h8M9 17h8"/></svg>
+                    <span>Reports</span>
                 </a>
                 <a href="#settings">
                     <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.3 2.3-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5v.2h-3.2v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1-2.3-2.3.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H4.7v-3.2h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9L6 8l2.3-2.3.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.5v-.2h3.2v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 8l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1h.2v3.2h-.2a1.7 1.7 0 0 0-1.5 1Z"/></svg>
                     <span>Settings</span>
                 </a>
             </nav>
+
+            <div class="sidebar-footer">
+                <span>API target</span>
+                <code id="api-target">Same origin</code>
+            </div>
         </aside>
 
-        <main>
+        <button id="sidebar-overlay" class="sidebar-overlay" type="button" aria-label="Close navigation" tabindex="-1"></button>
+
+        <main id="main-content">
             <header class="top-bar card">
-                <div class="hamburger-menu" id="hamburger-menu">☰</div>
+                <button class="hamburger-menu" id="hamburger-menu" type="button" aria-controls="sidebar" aria-expanded="false" aria-label="Open navigation">
+                    <span aria-hidden="true">☰</span>
+                </button>
+                <div class="system-badges" aria-live="polite">
+                    <span id="connection-badge" class="badge badge-pending"><span class="status-dot"></span>Connecting</span>
+                    <span id="data-source-badge" class="badge badge-neutral">Source unknown</span>
+                </div>
                 <div class="user-info">
-                    <span>Welcome, Admin</span>
-                    <div class="avatar"></div>
+                    <span>Environment Dashboard</span>
+                    <div class="avatar" aria-hidden="true"></div>
                 </div>
             </header>
 
-            <section id="dashboard" class="hero-card card gradient-bg">
+            <section id="dashboard" class="hero-card card gradient-bg" aria-labelledby="dashboard-title">
                 <div class="hero-content">
-                    <h1>Smart Home IoT System</h1>
-                    <p>Temperature Monitoring & Smart Lighting Control</p>
-                    <div class="status-indicator">
-                        <span class="dot online"></span>
-                        <span>System Online ✓</span>
+                    <p class="eyebrow">ESP32 central controller</p>
+                    <h1 id="dashboard-title">Smart Environment Monitoring &amp; Lighting Control</h1>
+                    <p>Temperature, ambient light and estimated dust density in one dashboard.</p>
+                    <div class="hero-meta">
+                        <span id="system-status-text" class="status-indicator"><span class="dot pending"></span>Connecting to system…</span>
+                        <span>Last update: <time id="last-updated">Never</time></span>
                     </div>
                 </div>
             </section>
 
-            <section class="cards grid-2-col">
-                <div id="temperature" class="card temp-card">
-                    <div class="card-header">
-                        <h3>🌡 Temperature</h3>
-                        <img src="assets/temperature.svg" alt="" onerror="this.style.display='none'">
+            <section id="sensors" class="section-block" aria-labelledby="sensors-title">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">Live measurements</p>
+                        <h2 id="sensors-title">Sensor overview</h2>
                     </div>
-                    <div class="card-body">
-                        <h2 id="temp-value" class="value text-cyan">29.4°C</h2>
-                        <p class="status">Status: <span id="temp-status">Normal</span></p>
-                        <div class="min-max">
-                            <span>Max: <span id="temp-max">--</span>°C</span>
-                            <span>Min: <span id="temp-min">--</span>°C</span>
-                            <span>Avg: <span id="temp-avg">--</span>°C</span>
-                        </div>
-                    </div>
+                    <span id="data-age" class="muted-text">Waiting for data</span>
                 </div>
 
-                <div id="lighting" class="card light-card">
-                    <div class="card-header">
-                        <h3>💡 Light Sensor</h3>
-                        <img src="assets/light.svg" alt="" onerror="this.style.display='none'">
-                    </div>
-                    <div class="card-body">
-                        <h2 id="light-value" class="value text-success">420 Lux</h2>
-                        <p class="status">Environment <span id="env-status">Bright</span></p>
-                        <p class="led-status">LED Status: <span id="led-status" class="badge badge-success">ON</span></p>
-                    </div>
+                <div class="sensor-grid">
+                    <article class="card sensor-card temp-card">
+                        <div class="card-header">
+                            <div>
+                                <p class="card-kicker">LM35</p>
+                                <h3>Temperature</h3>
+                            </div>
+                            <img src="assets/temperature.svg" alt="" width="32" height="32">
+                        </div>
+                        <div class="sensor-title-row">
+                            <strong id="temp-value" class="value text-cyan">--.-°C</strong>
+                            <span id="temp-sensor-state" class="badge badge-neutral">Unknown</span>
+                        </div>
+                        <p class="status">Status: <span id="temp-status">Unavailable</span></p>
+                        <div class="min-max" aria-label="Temperature statistics">
+                            <span>Max <strong id="temp-max">--</strong>°C</span>
+                            <span>Min <strong id="temp-min">--</strong>°C</span>
+                            <span>Avg <strong id="temp-avg">--</strong>°C</span>
+                        </div>
+                    </article>
+
+                    <article class="card sensor-card light-card">
+                        <div class="card-header">
+                            <div>
+                                <p class="card-kicker">LDR</p>
+                                <h3>Ambient light</h3>
+                            </div>
+                            <img src="assets/light.svg" alt="" width="32" height="32">
+                        </div>
+                        <div class="sensor-title-row">
+                            <strong id="light-value" class="value text-warning">-- Lux</strong>
+                            <span id="light-sensor-state" class="badge badge-neutral">Unknown</span>
+                        </div>
+                        <p class="status">Environment: <span id="env-status">Unavailable</span></p>
+                        <p class="led-status">Lighting LED: <span id="led-status" class="badge badge-neutral">Unknown</span></p>
+                    </article>
+
+                    <article class="card sensor-card dust-card">
+                        <div class="card-header">
+                            <div>
+                                <p class="card-kicker">GP2Y1014AU0F</p>
+                                <h3>Estimated dust density</h3>
+                            </div>
+                            <img src="assets/dust.svg" alt="" width="32" height="32">
+                        </div>
+                        <div class="sensor-title-row">
+                            <strong id="dust-value" class="value text-dust">-- µg/m³</strong>
+                            <span id="dust-sensor-state" class="badge badge-neutral">Unknown</span>
+                        </div>
+                        <div class="dust-details">
+                            <span>Sensor voltage <strong id="dust-voltage">-- V</strong></span>
+                            <span>Raw ADC <strong id="dust-raw-adc">--</strong></span>
+                            <span>Internal level <strong id="dust-level" class="badge badge-neutral">Unavailable</strong></span>
+                            <span>Calibration <strong id="dust-calibration">Unknown</strong></span>
+                        </div>
+                        <p id="dust-error" class="sensor-error" role="status" hidden></p>
+                        <p id="dust-disclaimer" class="disclaimer">Mật độ bụi ước tính – chỉ dùng cho mục đích học tập và theo dõi xu hướng.</p>
+                    </article>
                 </div>
             </section>
 
-            <section class="cards grid-2-col">
-                <div class="card control-panel">
-                    <h3>Control Panel</h3>
+            <section class="cards control-health-grid" aria-label="Lighting controls and sensor health">
+                <article class="card control-panel">
+                    <div class="card-header">
+                        <div>
+                            <p class="card-kicker">Lighting</p>
+                            <h2>Control panel</h2>
+                        </div>
+                        <span id="control-pending" class="spinner" hidden aria-label="Sending command"></span>
+                    </div>
                     <div class="control-group">
-                        <label>Mode</label>
-                        <div class="toggle-buttons" id="mode-buttons">
-                            <button class="btn active" data-mode="AUTO">AUTO</button>
-                            <button class="btn" data-mode="MANUAL">MANUAL</button>
+                        <span class="control-label">Mode</span>
+                        <div class="toggle-buttons" id="mode-buttons" role="group" aria-label="Lighting mode">
+                            <button class="btn" type="button" data-mode="AUTO" aria-pressed="false" disabled>AUTO</button>
+                            <button class="btn" type="button" data-mode="MANUAL" aria-pressed="false" disabled>MANUAL</button>
                         </div>
                     </div>
                     <div class="control-group">
-                        <label>Light</label>
-                        <div class="toggle-buttons" id="light-buttons">
-                            <button class="btn active" data-light="ON">ON</button>
-                            <button class="btn" data-light="OFF">OFF</button>
+                        <span class="control-label">LED command</span>
+                        <div class="toggle-buttons" id="light-buttons" role="group" aria-label="Lighting LED command">
+                            <button class="btn" type="button" data-light="ON" aria-pressed="false" disabled>ON</button>
+                            <button class="btn" type="button" data-light="OFF" aria-pressed="false" disabled>OFF</button>
                         </div>
+                        <p id="manual-mode-hint" class="field-hint">Live status is required before controls become available.</p>
                     </div>
-                </div>
+                    <p id="control-feedback" class="inline-feedback" role="status" aria-live="polite"></p>
+                </article>
 
-                <div class="card alert-center">
-                    <h3>Alert Center</h3>
-                    <ul class="alert-list" id="alert-list">
-                        <li class="alert-item success">
-                            <span class="alert-icon" aria-hidden="true">✓</span>
-                            <span class="alert-message">System Normal</span>
-                            <button class="alert-close" type="button" aria-label="Close alert">×</button>
-                        </li>
-                        <!-- Alerts will be dynamically injected here -->
+                <article class="card sensor-health-card">
+                    <div class="card-header">
+                        <div>
+                            <p class="card-kicker">Diagnostics</p>
+                            <h2>Sensor health</h2>
+                        </div>
+                        <span class="section-icon" aria-hidden="true">✓</span>
+                    </div>
+                    <ul class="health-list">
+                        <li><span><span class="health-icon temp-health" aria-hidden="true"></span>LM35 temperature</span><strong id="health-temperature">Unknown</strong></li>
+                        <li><span><span class="health-icon light-health" aria-hidden="true"></span>LDR light</span><strong id="health-light">Unknown</strong></li>
+                        <li><span><span class="health-icon dust-health" aria-hidden="true"></span>GP2Y1014AU0F dust</span><strong id="health-dust">Unknown</strong></li>
                     </ul>
-                </div>
+                    <p>Dust last update: <time id="dust-last-update">Never</time></p>
+                </article>
             </section>
 
-            <section id="analytics" class="cards grid-2-col">
-                <div class="card analytics-card">
-                    <div class="card-header">
-                        <h3>Temperature Analytics</h3>
-                        <span class="section-icon" aria-hidden="true">↗</span>
+            <section id="history" class="section-block" aria-labelledby="history-title">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">Recorded samples</p>
+                        <h2 id="history-title">History &amp; analytics</h2>
+                    </div>
+                    <button id="history-refresh" class="secondary-button" type="button">Refresh history</button>
+                </div>
+
+                <article class="card analytics-card">
+                    <div class="card-header compact-header">
+                        <h3>Temperature analytics</h3>
+                        <span id="stats-scope" class="badge badge-neutral">No samples</span>
                     </div>
                     <div class="analytics-grid">
                         <div class="metric"><span>Maximum</span><strong id="analytics-max">--°C</strong></div>
@@ -134,23 +232,172 @@
                         <div class="metric"><span>Average</span><strong id="analytics-avg">--°C</strong></div>
                         <div class="metric"><span>Readings</span><strong id="analytics-readings">0</strong></div>
                     </div>
-                </div>
+                </article>
 
-                <div id="settings" class="card settings-card">
-                    <h3>Settings</h3>
-                    <p>Choose how the dashboard looks on this browser.</p>
-                    <div class="setting-row">
+                <div class="charts-grid">
+                    <article class="card chart-card">
+                        <div class="card-header compact-header"><h3>Temperature</h3><span>°C</span></div>
+                        <div class="chart-wrap"><canvas id="temperature-chart" role="img" aria-label="Temperature history chart"></canvas></div>
+                        <p id="temperature-chart-status" class="chart-status">Waiting for history</p>
+                    </article>
+                    <article class="card chart-card">
+                        <div class="card-header compact-header"><h3>Ambient light</h3><span>Lux</span></div>
+                        <div class="chart-wrap"><canvas id="light-chart" role="img" aria-label="Ambient light history chart"></canvas></div>
+                        <p id="light-chart-status" class="chart-status">Waiting for history</p>
+                    </article>
+                    <article class="card chart-card">
+                        <div class="card-header compact-header"><h3>Estimated dust density</h3><span>µg/m³</span></div>
+                        <div class="chart-wrap"><canvas id="dust-chart" role="img" aria-label="Estimated dust density history chart"></canvas></div>
+                        <p id="dust-chart-status" class="chart-status">Waiting for history</p>
+                    </article>
+                </div>
+                <p id="history-api-status" class="section-status" role="status" aria-live="polite"></p>
+            </section>
+
+            <section id="notifications" class="section-block" aria-labelledby="notifications-title">
+                <article class="card feature-card">
+                    <div class="section-heading inside-card">
                         <div>
-                            <strong>Dark mode</strong>
-                            <span>Switch between light and dark appearance</span>
+                            <p class="eyebrow">Alerts and events</p>
+                            <h2 id="notifications-title">Notification Center <span id="notification-unread" class="heading-count">0 unread</span></h2>
                         </div>
-                        <button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false">Use dark mode</button>
+                        <div class="action-row">
+                            <button id="notification-permission" class="secondary-button" type="button">Enable browser alerts</button>
+                            <button id="notifications-refresh" class="icon-button" type="button" aria-label="Refresh notifications">↻</button>
+                        </div>
+                    </div>
+                    <p id="notification-api-status" class="section-status" role="status" aria-live="polite">Loading notifications…</p>
+                    <ul class="notification-list" id="notification-list" aria-label="Notifications"></ul>
+                    <p id="notification-empty" class="empty-state" hidden>No notifications yet.</p>
+                </article>
+            </section>
+
+            <section id="forecast" class="section-block" aria-labelledby="forecast-title">
+                <article class="card feature-card">
+                    <div class="section-heading inside-card">
+                        <div>
+                            <p class="eyebrow">Short-term statistical trend</p>
+                            <h2 id="forecast-title">Forecast</h2>
+                        </div>
+                        <button id="forecast-refresh" class="secondary-button" type="button">Refresh forecast</button>
+                    </div>
+                    <p id="forecast-status" class="section-status" role="status" aria-live="polite">Loading forecast…</p>
+                    <div id="forecast-grid" class="forecast-grid"></div>
+                    <p class="disclaimer forecast-disclaimer">Dự báo chỉ mang tính tham khảo, không thay thế thiết bị quan trắc môi trường chuyên dụng.</p>
+                </article>
+            </section>
+
+            <section id="reports" class="section-block" aria-labelledby="reports-title">
+                <article class="card feature-card">
+                    <div class="section-heading inside-card">
+                        <div>
+                            <p class="eyebrow">Operational summary</p>
+                            <h2 id="reports-title">Daily &amp; weekly reports</h2>
+                        </div>
+                        <div class="action-row">
+                            <div class="period-switch" role="group" aria-label="Report period">
+                                <button type="button" data-period="daily" class="active" aria-pressed="true">Daily</button>
+                                <button type="button" data-period="weekly" aria-pressed="false">Weekly</button>
+                            </div>
+                            <button id="report-export" class="secondary-button" type="button" disabled>Export CSV</button>
+                        </div>
+                    </div>
+                    <p id="report-status" class="section-status" role="status" aria-live="polite">Loading daily report…</p>
+                    <div id="report-grid" class="report-grid"></div>
+                    <div class="report-notes-grid">
+                        <div>
+                            <h3>Automatic comments</h3>
+                            <ul id="report-comments" class="plain-list"><li>No report loaded.</li></ul>
+                        </div>
+                        <div>
+                            <h3>Recommendations</h3>
+                            <ul id="report-recommendations" class="plain-list"><li>No recommendations loaded.</li></ul>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <section id="settings" class="section-block" aria-labelledby="settings-title">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">Dashboard and controller</p>
+                        <h2 id="settings-title">Settings</h2>
                     </div>
                 </div>
+
+                <div class="settings-grid">
+                    <article class="card settings-card appearance-card">
+                        <h3>Appearance</h3>
+                        <p>Choose how the dashboard looks on this browser.</p>
+                        <div class="setting-row">
+                            <div>
+                                <strong>Dark mode</strong>
+                                <span>Stored only in this browser</span>
+                            </div>
+                            <button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false">Use dark mode</button>
+                        </div>
+                    </article>
+
+                    <article class="card settings-card config-card">
+                        <div class="card-header compact-header">
+                            <div>
+                                <h3>Thresholds &amp; dust calibration</h3>
+                                <p>Project alert thresholds, not an official AQI configuration.</p>
+                            </div>
+                            <button id="config-refresh" class="icon-button" type="button" aria-label="Reload configuration">↻</button>
+                        </div>
+                        <form id="config-form" novalidate>
+                            <fieldset>
+                                <legend>Temperature and light</legend>
+                                <div class="form-grid">
+                                    <label>High temperature (°C)<input id="config-temperature" name="temperatureThreshold" type="number" step="0.1" min="-55" max="150" required></label>
+                                    <label>Dark threshold (Lux)<input id="config-dark" name="darkThreshold" type="number" step="1" min="0" required></label>
+                                    <label>Bright threshold (Lux)<input id="config-bright" name="brightThreshold" type="number" step="1" min="0" required></label>
+                                    <label>History sample limit<input id="config-history-limit" name="historyLimit" type="number" step="1" min="1" max="5000"></label>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <legend>Internal dust levels (µg/m³)</legend>
+                                <div class="form-grid">
+                                    <label>Moderate<input id="config-dust-moderate" name="dustModerateThreshold" type="number" step="0.1" min="0" required></label>
+                                    <label>High<input id="config-dust-high" name="dustHighThreshold" type="number" step="0.1" min="0" required></label>
+                                    <label>Dangerous<input id="config-dust-dangerous" name="dustDangerousThreshold" type="number" step="0.1" min="0" required></label>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <legend>GP2Y1014AU0F calibration</legend>
+                                <div class="form-grid">
+                                    <label>Clean-air baseline (V)<input id="config-dust-baseline" name="dustBaselineVoltage" type="number" step="0.001" min="0" max="3.3" required></label>
+                                    <label>Calibration factor<input id="config-dust-factor" name="dustCalibrationFactor" type="number" step="0.001" min="0.001" required></label>
+                                    <label>Sensor sensitivity<input id="config-dust-sensitivity" name="dustSensitivity" type="number" step="0.0001" min="0.0001"></label>
+                                    <label>ADC reference (V)<input id="config-adc-reference" name="adcReferenceVoltage" type="number" step="0.01" min="1" max="3.6"></label>
+                                    <label>Notification cooldown (s)<input id="config-cooldown" name="notificationCooldownSeconds" type="number" step="1" min="0"></label>
+                                    <label class="checkbox-label"><input id="config-dust-calibrated" name="dustCalibrated" type="checkbox"> Calibrated against a reference instrument</label>
+                                </div>
+                            </fieldset>
+                            <div class="form-actions">
+                                <button id="config-submit" class="primary-button" type="submit" disabled>Save configuration</button>
+                                <p id="config-status" class="inline-feedback" role="status" aria-live="polite">Loading configuration…</p>
+                            </div>
+                        </form>
+                    </article>
+                </div>
             </section>
+
+            <footer class="dashboard-footer">
+                <p>Estimated GP2Y1014AU0F dust values require calibration against a reference instrument.</p>
+            </footer>
         </main>
     </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
     <script src="js/api.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/forecast.js"></script>
+    <script src="js/reports.js"></script>
+    <script src="js/config.js"></script>
     <script src="js/dashboard.js"></script>
     <script src="js/app.js"></script>
 </body>
