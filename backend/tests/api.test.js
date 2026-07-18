@@ -90,6 +90,31 @@ test('POST /api/sensor records readings and applies auto lighting', async () => 
   });
 });
 
+test('PIR motion creates an intruder alert and critical notification', async () => {
+  await withServer(async (baseUrl) => {
+    const response = await request(baseUrl, '/api/sensor', {
+      method: 'POST',
+      body: JSON.stringify({
+        temperature: 28,
+        lightLevel: 420,
+        motionDetected: true
+      })
+    });
+
+    assert.equal(response.status, 201);
+    assert.equal(response.data.motionDetected, true);
+    assert.equal(response.data.alerts.intruderDetected, true);
+
+    const notifications = await request(baseUrl, '/api/notifications');
+    const intruder = notifications.data.items.find(
+      (item) => item.type === 'INTRUDER_DETECTED'
+    );
+    assert.ok(intruder);
+    assert.equal(intruder.severity, 'CRITICAL');
+    assert.equal(intruder.read, false);
+  });
+});
+
 test('POST /api/light switches to manual mode', async () => {
   await withServer(async (baseUrl) => {
     const response = await request(baseUrl, '/api/light', {

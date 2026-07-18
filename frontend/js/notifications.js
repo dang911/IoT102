@@ -250,6 +250,18 @@
         const dustHigh = booleanValue(alerts.dustHigh) === true || ['HIGH', 'DANGEROUS'].includes(dustLevel);
         const dustOffline = booleanValue(alerts.dustSensorOffline) === true || booleanValue(dust.sensorOnline) === false;
         const dustInvalid = booleanValue(dust.valid) === false || Boolean(dust.error);
+        const intruderDetected = booleanValue(
+            alerts.intruderDetected ?? data.motionDetected ?? data.presenceDetected
+        ) === true;
+
+        raiseCondition('intruder-detected', intruderDetected, {
+            type: 'INTRUDER_DETECTED',
+            severity: 'critical',
+            title: 'Cảnh báo có người lạ vào nhà',
+            message: 'Cảm biến chuyển động phát hiện có người trong nhà. Hãy kiểm tra ngay.',
+            value: true,
+            source: data.source || 'controller'
+        });
 
         raiseCondition('temperature-high', temperatureHigh, {
             type: 'TEMPERATURE_HIGH',

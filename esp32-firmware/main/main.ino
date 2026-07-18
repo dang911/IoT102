@@ -16,6 +16,7 @@ struct SensorData {
   float temperature = 25.0;
   int lightLevel = 400;
   bool lightStatus = true;
+  bool motionDetected = false;
   String mode = "AUTO";
   String temperatureStatus = "NORMAL";
   String lightEnvironment = "BRIGHT";
@@ -112,11 +113,13 @@ void parseArduinoData(String data) {
   int light = extractIntValue(data, "LIGHT:");
   String led = extractStringValue(data, "LED:");
   String mode = extractStringValue(data, "MODE:");
+  int motion = extractIntValue(data, "MOTION:");
 
   if (temp > -100) sensorData.temperature = temp;
   if (light >= 0) sensorData.lightLevel = light;
   if (led != "") sensorData.lightStatus = (led == "ON" || led == "1");
   if (mode != "") sensorData.mode = mode;
+  if (motion >= 0) sensorData.motionDetected = motion == 1;
 
   // Update status
   updateSensorStatus();
@@ -177,11 +180,14 @@ void updateSensorData() {
 
 // ==================== API HANDLERS ====================
 void handleGetStatus() {
-  StaticJsonDocument<256> json;
+  StaticJsonDocument<384> json;
 
   json["temperature"] = sensorData.temperature;
   json["lightLevel"] = sensorData.lightLevel;
   json["lightStatus"] = sensorData.lightStatus;
+  json["motionDetected"] = sensorData.motionDetected;
+  JsonObject alerts = json["alerts"].to<JsonObject>();
+  alerts["intruderDetected"] = sensorData.motionDetected;
   json["mode"] = sensorData.mode;
   json["temperatureStatus"] = sensorData.temperatureStatus;
   json["lightEnvironment"] = sensorData.lightEnvironment;

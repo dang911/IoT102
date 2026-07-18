@@ -7,6 +7,17 @@ function buildNotificationCandidates(status, config) {
   }
   const candidates = [
     {
+      key: 'intruderDetected',
+      active: Boolean(status.alerts.intruderDetected),
+      type: 'INTRUDER_DETECTED',
+      severity: 'CRITICAL',
+      title: 'Cảnh báo có người lạ vào nhà',
+      message: 'Cảm biến chuyển động phát hiện có người trong nhà. Hãy kiểm tra ngay.',
+      value: true,
+      threshold: null,
+      source: status.source
+    },
+    {
       key: 'temperatureHigh',
       active: status.alerts.temperatureHigh,
       type: 'TEMPERATURE_HIGH',

@@ -162,10 +162,20 @@ try {
     $row.Cells.Item(2).Range.Text = 'Sharp GP2Y1014AU0F'
     $row.Cells.Item(3).Range.Text = 'Estimates dust density from an analog voltage output'
 
+    $row = $doc.Tables.Item(1).Rows.Add()
+    $row.Cells.Item(1).Range.Text = '11'
+    $row.Cells.Item(2).Range.Text = 'HC-SR501 PIR motion sensor'
+    $row.Cells.Item(3).Range.Text = 'Detects human motion for home-intrusion alerts'
+
     $row = $doc.Tables.Item(2).Rows.Add()
     $row.Cells.Item(1).Range.Text = '10'
     $row.Cells.Item(2).Range.Text = 'Sharp GP2Y1014AU0F'
     $row.Cells.Item(3).Range.Text = 'Ước tính mật độ bụi từ điện áp analog'
+
+    $row = $doc.Tables.Item(2).Rows.Add()
+    $row.Cells.Item(1).Range.Text = '11'
+    $row.Cells.Item(2).Range.Text = 'Cảm biến chuyển động PIR HC-SR501'
+    $row.Cells.Item(3).Range.Text = 'Phát hiện chuyển động của người để cảnh báo xâm nhập nhà'
   }
 
   # Repair layout defects already present in the source report. Two overall
@@ -209,6 +219,7 @@ LM35 GPIO34 ─┐
 LDR  GPIO35 ─┼─ ADC1 ─┐
 GP2Y Vo ─ divider ─ GPIO32
 GP2Y LED ───────── GPIO25
+PIR OUT ────────── GPIO27
                          ▼
                  ESP32 central controller
           AUTO/MANUAL + LED + LCD + Wi-Fi/API
@@ -234,6 +245,7 @@ GP2Y LED ───────── GPIO25
     @('GP2Y pin 4', 'S-GND', 'GND chung', 'Nối chung với toàn hệ thống.'),
     @('GP2Y pin 5', 'Vo', 'GPIO32 qua divider', 'Vo → 10 kΩ → GPIO32; 12 kΩ từ GPIO32 xuống GND.'),
     @('GP2Y pin 6', 'Vcc', '5 V', 'Nguồn làm việc 5 ± 0.5 V.')
+    @('HC-SR501 PIR', 'VCC / OUT / GND', '5 V / GPIO27 / GND', 'OUT là tín hiệu số; chỉnh độ nhạy và thời gian giữ trên module, chờ ổn định 30–60 giây sau khi cấp nguồn.')
   ) @(85, 72, 96, 198) | Out-Null
   Add-Paragraph 'Voltage-divider protection / Bảo vệ ADC:' 'Heading 2' 5 | Out-Null
   Add-CodeBlock @'
@@ -326,7 +338,13 @@ densityOffset = 0.00 µg/m³
 
   Add-Paragraph '3.12 Notifications, Forecasts, and Reports / Thông báo, dự báo và báo cáo' 'Heading 1' 8 | Out-Null
   Add-Paragraph 'Notification Center / Trung tâm thông báo' 'Heading 2' 5 | Out-Null
-  Add-Paragraph 'Each notification contains an ID, type, title, message, measured value, threshold, timestamp, read state, and source. Events cover high temperature, low light, high dust, dust-sensor timeout, abnormal sensor values, ESP32/backend disconnection, and transitions to HIGH or DANGEROUS. A state-transition key and configurable cooldown prevent repeated alerts. Browser Notification API is optional; the in-page center remains functional when permission is denied.' | Out-Null
+  Add-Paragraph 'Each notification contains an ID, type, title, message, measured value, threshold, timestamp, read state, and source. Events cover high temperature, low light, high dust, dust-sensor timeout, abnormal sensor values, ESP32/backend disconnection, intruder detection, and transitions to HIGH or DANGEROUS. A state-transition key and configurable cooldown prevent repeated alerts. Browser Notification API is optional; the in-page center remains functional when permission is denied.' | Out-Null
+  Add-Paragraph 'Intruder alert / Cảnh báo người lạ vào nhà' 'Heading 2' 5 | Out-Null
+  Add-Paragraph 'The HC-SR501 detects changes in infrared radiation caused by a moving person. Its OUT pin is read by ESP32 GPIO27 in the primary one-board architecture, or by Arduino UNO D2 and forwarded as MOTION:1 in the two-board architecture. When active, the status API exposes motionDetected=true and alerts.intruderDetected=true. The backend creates an unread INTRUDER_DETECTED notification with CRITICAL severity, while the dashboard displays an immediate Vietnamese warning and can show a browser notification after permission is granted.' | Out-Null
+  Add-Paragraph 'Cảm biến HC-SR501 phát hiện sự thay đổi bức xạ hồng ngoại do người di chuyển. Chân OUT được ESP32 đọc tại GPIO27 trong kiến trúc một bo; với kiến trúc hai bo, Arduino UNO đọc tại D2 rồi truyền MOTION:1 sang ESP32. Khi phát hiện chuyển động, API trả motionDetected=true và alerts.intruderDetected=true. Backend tạo thông báo INTRUDER_DETECTED chưa đọc ở mức CRITICAL; dashboard đồng thời hiển thị cảnh báo tiếng Việt và có thể gửi thông báo trình duyệt sau khi người dùng cấp quyền.' | Out-Null
+  Add-Bullet 'Luồng xử lý: PIR phát hiện chuyển động → firmware cập nhật trạng thái → API/backend tạo sự kiện → Notification Center và browser alert cảnh báo người dùng.' | Out-Null
+  Add-Bullet 'Cơ chế transition và cooldown ngăn cảnh báo lặp liên tục; khi PIR trở về LOW, hệ thống được tái kích hoạt cho lần phát hiện kế tiếp.' | Out-Null
+  Add-Bullet 'PIR chỉ xác nhận có chuyển động, không nhận dạng danh tính. Trong đồ án, chuyển động được diễn giải là “người lạ” để phục vụ kịch bản cảnh báo an ninh; hệ thống thực tế nên kết hợp camera, cảm biến cửa hoặc chế độ arm/disarm.' | Out-Null
   Add-Paragraph 'Short-term forecast / Dự báo ngắn hạn' 'Heading 2' 5 | Out-Null
   Add-Paragraph 'Forecasts use moving averages, simple linear regression, and recent rate of change. Results include predicted temperature and dust, increasing/decreasing/stable trend, horizon, sample count, confidence, and an insufficient-data flag. This is statistical forecasting, not artificial intelligence.' | Out-Null
   Add-Paragraph 'Dự báo chỉ mang tính tham khảo, không thay thế thiết bị quan trắc môi trường chuyên dụng.' 'Normal' 8 | ForEach-Object { $_.Range.Font.Bold = $true; $_.Range.Font.Color = 192 }

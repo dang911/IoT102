@@ -66,6 +66,7 @@ Lcd1602I2C lcd;
 
 String mode = "AUTO";
 bool lightStatus = false;
+bool motionDetected = false;
 float temperatureC = 0.0f;
 int lightLevel = 0;
 AnalogSensorHealth temperatureSensor = {};
@@ -326,6 +327,7 @@ void populateStatusDocument(JsonDocument& document) {
   document["temperature"] = serialized(String(temperatureC, 1));
   document["lightLevel"] = lightLevel;
   document["lightStatus"] = lightStatus;
+  document["motionDetected"] = motionDetected;
   document["mode"] = mode;
   document["temperatureStatus"] = tempState;
   document["lightEnvironment"] = environment;
@@ -404,6 +406,7 @@ void populateStatusDocument(JsonDocument& document) {
   alerts["sensorAbnormal"] = temperatureSensor.abnormal ||
                                lightSensor.abnormal ||
                                dustSensorState.abnormal;
+  alerts["intruderDetected"] = motionDetected;
 
   JsonObject thresholds = document["thresholds"].to<JsonObject>();
   thresholds["temperature"] = runtimeConfig.temperatureThreshold;
@@ -965,6 +968,7 @@ void setup() {
   loadRuntimeConfig();
 
   pinMode(LIGHT_LED_PIN, OUTPUT);
+  pinMode(PIR_PIN, INPUT);
   writeLightLed(false);
   analogReadResolution(12);
   analogSetPinAttenuation(LM35_PIN, ADC_6db);
@@ -993,6 +997,7 @@ void setup() {
 
 void loop() {
   server.handleClient();
+  motionDetected = digitalRead(PIR_PIN) == HIGH;
   updateDustSensor();
   readEnvironmentSensors();
   updateLcd();

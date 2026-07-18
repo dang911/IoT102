@@ -11,6 +11,7 @@ constexpr uint8_t LDR_PIN = 35;           // ADC1_CH7, input only
 constexpr uint8_t DUST_ANALOG_PIN = 32;   // ADC1_CH4
 constexpr uint8_t DUST_LED_PIN = 25;      // Open-drain, active LOW
 constexpr uint8_t LIGHT_LED_PIN = 2;
+constexpr uint8_t PIR_PIN = 27;           // HC-SR501 digital output
 constexpr uint8_t LCD_SDA_PIN = 21;
 constexpr uint8_t LCD_SCL_PIN = 22;
 

@@ -9,6 +9,7 @@ const {
   normalizeConfigPatch,
   normalizeDataMode,
   normalizeLightStatus,
+  normalizeMotionDetected,
   normalizeMode,
   normalizeReading
 } = require('./domain');
@@ -109,6 +110,7 @@ function initialState(config = {}, now = new Date().toISOString()) {
   const latest = {
     temperature: 28,
     lightLevel: 420,
+    motionDetected: false,
     dust: createOfflineDust({
       calibrated: mergedConfig.dustCalibration.calibrated
     }),
@@ -237,6 +239,7 @@ class JsonStore {
       lightLevel: Number.isFinite(lightLevel)
         ? lightLevel
         : Number(fallback.lightLevel),
+      motionDetected: normalizeMotionDetected(entry || {}, fallback.motionDetected),
       dust: this.migrateDust(entry, config, timestamp),
       sensors: readingSensorMetadata(entry || {}, timestamp),
       timestamp,
@@ -309,6 +312,7 @@ class JsonStore {
     const latest = {
       temperature: latestWithMetadata.temperature,
       lightLevel: latestWithMetadata.lightLevel,
+      motionDetected: latestWithMetadata.motionDetected,
       dust: latestWithMetadata.dust,
       sensors: latestWithMetadata.sensors,
       timestamp: latestWithMetadata.timestamp,
@@ -498,6 +502,7 @@ class JsonStore {
     const normalizedDust = normalizeDustReading(payload, this.state.config, now);
     const reading = {
       ...normalizeReading(payload),
+      motionDetected: normalizeMotionDetected(payload, false),
       dust: normalizedDust || clone(this.state.latest.dust),
       sensors: readingSensorMetadata(payload, now),
       timestamp: now,
@@ -567,6 +572,10 @@ class JsonStore {
         : clone(this.state.latest.dust);
       const reading = {
         ...sensorValues,
+        motionDetected: normalizeMotionDetected(
+          payload,
+          this.state.latest.motionDetected
+        ),
         dust,
         sensors: readingSensorMetadata(payload, timestamp),
         timestamp,

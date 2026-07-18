@@ -114,6 +114,17 @@ function normalizeReading(payload) {
   };
 }
 
+function normalizeMotionDetected(payload = {}, fallback = false) {
+  const value = payload.motionDetected ?? payload.presenceDetected ??
+    payload.intruderDetected ?? payload.alerts?.intruderDetected;
+  if (value === undefined || value === null || value === '') return Boolean(fallback);
+  if (typeof value === 'boolean') return value;
+  const normalized = String(value).trim().toLowerCase();
+  if (['true', '1', 'yes', 'on', 'motion'].includes(normalized)) return true;
+  if (['false', '0', 'no', 'off', 'clear'].includes(normalized)) return false;
+  throw new HttpError(400, 'motionDetected must be a boolean');
+}
+
 function cloneDefaultConfig() {
   return {
     ...DEFAULT_CONFIG,
@@ -397,6 +408,7 @@ function buildStatus(state, now = new Date().toISOString()) {
     temperature > state.config.temperatureThreshold;
   const lowLight = lightOnline && lightLevel < state.config.darkThreshold;
   const sensorAbnormal = temperatureAbnormal || lightAbnormal || Boolean(dust.abnormal);
+  const motionDetected = Boolean(latest.motionDetected);
 
   let environmentQuality = 'NORMAL';
   if (dust.level === 'DANGEROUS') {
@@ -415,6 +427,7 @@ function buildStatus(state, now = new Date().toISOString()) {
     timestamp: latest.timestamp || null,
     source: latest.source || 'unknown',
     dataMode: latest.dataMode || normalizeDataMode(undefined, latest.source),
+    motionDetected,
     dust,
     sensors: {
       temperature: {
@@ -456,7 +469,8 @@ function buildStatus(state, now = new Date().toISOString()) {
       lowLight,
       dustHigh,
       dustSensorOffline,
-      sensorAbnormal
+      sensorAbnormal,
+      intruderDetected: motionDetected
     },
     metrics: calculateMetrics(state.history || []),
     thresholds: {
@@ -478,6 +492,7 @@ module.exports = {
   normalizeConfigPatch,
   normalizeDataMode,
   normalizeLightStatus,
+  normalizeMotionDetected,
   normalizeMode,
   normalizeReading,
   round,

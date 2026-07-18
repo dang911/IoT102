@@ -16,6 +16,7 @@
 #define TEMP_PIN A0
 #define LIGHT_PIN A1
 #define LED_PIN 7
+#define PIR_PIN 2
 
 // Calibration values (tuỳ theo cảm biến thực tế)
 #define TEMP_MAX 40.0
@@ -25,6 +26,7 @@
 float temperature = 25.0;
 int lightLevel = 400;
 bool ledStatus = true;
+bool motionDetected = false;
 String mode = "AUTO";
 
 unsigned long lastSendTime = 0;
@@ -38,6 +40,7 @@ void setup() {
   pinMode(TEMP_PIN, INPUT);
   pinMode(LIGHT_PIN, INPUT);
   pinMode(LED_PIN, OUTPUT);
+  pinMode(PIR_PIN, INPUT);
 
   delay(100);
   Serial.println("Arduino UNO Sensor Module Started");
@@ -50,6 +53,7 @@ void loop() {
   // Read sensors
   readTemperature();
   readLightLevel();
+  motionDetected = digitalRead(PIR_PIN) == HIGH;
 
   // Send data to ESP32 every SEND_INTERVAL
   if (millis() - lastSendTime >= SEND_INTERVAL) {
@@ -104,7 +108,9 @@ void sendDataToESP32() {
   Serial.print(ledStatus ? "ON" : "OFF");
 
   Serial.print(",MODE:");
-  Serial.println(mode);
+  Serial.print(mode);
+  Serial.print(",MOTION:");
+  Serial.println(motionDetected ? "1" : "0");
 }
 
 // ==================== COMMAND HANDLING ====================

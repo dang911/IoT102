@@ -138,6 +138,12 @@ Khi ESP32 mất kết nối, backend giữ cache nhưng trả metadata offline; 
 | POST | `/api/light` | Bật/tắt LED và chuyển sang MANUAL |
 | GET | `/api/notifications` | Danh sách Notification Center |
 | PATCH | `/api/notifications/:id/read` | Đánh dấu đã đọc |
+
+Để bật cảnh báo người lạ, nối ngõ ra số của cảm biến PIR HC-SR501 vào GPIO27
+trên firmware ESP32 chính (hoặc chân D2 của Arduino UNO ở kiến trúc hai bo).
+Khi có chuyển động, API trả `motionDetected: true` và
+`alerts.intruderDetected: true`; Notification Center tạo cảnh báo
+`INTRUDER_DETECTED` mức nghiêm trọng và gửi browser notification nếu đã được cấp quyền.
 | GET | `/api/forecast` | Dự báo xu hướng thống kê ngắn hạn |
 | GET | `/api/reports?period=daily` | Báo cáo ngày |
 | GET | `/api/reports?period=weekly` | Báo cáo tuần |

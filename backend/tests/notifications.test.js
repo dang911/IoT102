@@ -104,6 +104,7 @@ test('status is mapped to required notification types', () => {
       error: null
     },
     alerts: {
+      intruderDetected: true,
       temperatureHigh: true,
       lowLight: true,
       dustHigh: true,
@@ -123,6 +124,7 @@ test('status is mapped to required notification types', () => {
     .filter((item) => item.active)
     .map((item) => item.type);
   assert.deepEqual(activeTypes, [
+    'INTRUDER_DETECTED',
     'TEMPERATURE_HIGH',
     'LOW_LIGHT',
     'DUST_HIGH',
