@@ -122,6 +122,18 @@
       "timestamp": "2026-07-15T06:59:47.296Z",
       "read": false,
       "source": "backend"
+    },
+    {
+      "id": "notification-000002",
+      "type": "DUST_SENSOR_OFFLINE",
+      "severity": "WARNING",
+      "title": "Cảm biến bụi mất dữ liệu",
+      "message": "Không nhận được dữ liệu hợp lệ mới từ cảm biến bụi.",
+      "value": null,
+      "threshold": 60000,
+      "timestamp": "2026-07-16T03:17:43.534Z",
+      "read": false,
+      "source": "backend"
     }
   ],
   "alertStates": {
@@ -129,46 +141,46 @@
       "active": false,
       "stateToken": null,
       "lastNotificationAt": null,
-      "lastEvaluatedAt": "2026-07-15T07:02:33.602Z"
+      "lastEvaluatedAt": "2026-07-16T03:17:52.151Z"
     },
     "lowLight": {
       "active": false,
       "stateToken": null,
       "lastNotificationAt": null,
-      "lastEvaluatedAt": "2026-07-15T07:02:33.602Z"
+      "lastEvaluatedAt": "2026-07-16T03:17:52.151Z"
     },
     "dustHigh": {
       "active": false,
       "stateToken": null,
       "lastNotificationAt": null,
-      "lastEvaluatedAt": "2026-07-15T07:02:33.602Z"
+      "lastEvaluatedAt": "2026-07-16T03:17:52.151Z"
     },
     "dustSensorOffline": {
       "active": true,
       "stateToken": "NO_DATA",
-      "lastNotificationAt": "2026-07-15T06:59:47.296Z",
-      "lastEvaluatedAt": "2026-07-15T07:02:33.602Z"
+      "lastNotificationAt": "2026-07-16T03:17:43.534Z",
+      "lastEvaluatedAt": "2026-07-16T03:17:52.151Z"
     },
     "sensorAbnormal": {
       "active": false,
       "stateToken": null,
       "lastNotificationAt": null,
-      "lastEvaluatedAt": "2026-07-15T07:02:33.602Z"
+      "lastEvaluatedAt": "2026-07-16T03:17:52.151Z"
     },
     "esp32Offline": {
       "active": false,
       "stateToken": null,
       "lastNotificationAt": null,
-      "lastEvaluatedAt": "2026-07-15T07:02:33.602Z"
+      "lastEvaluatedAt": "2026-07-16T03:17:52.151Z"
     },
     "environmentDegraded": {
       "active": false,
       "stateToken": null,
       "lastNotificationAt": null,
-      "lastEvaluatedAt": "2026-07-15T07:02:33.602Z"
+      "lastEvaluatedAt": "2026-07-16T03:17:52.151Z"
     }
   },
-  "nextNotificationId": 2,
+  "nextNotificationId": 3,
   "connection": {
     "enabled": false,
     "esp32Online": null,
@@ -186,6 +198,7 @@
     "light": false,
     "dust": false
   },
+  "disconnectEvents": [],
   "lightEvents": [
     {
       "timestamp": "2026-07-15T06:47:59.399Z",
