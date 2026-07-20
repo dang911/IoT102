@@ -19,12 +19,13 @@ function envBoolean(name, fallback) {
 const rootDir = path.resolve(__dirname, '..');
 const port = envNumber('PORT', 3000);
 const host = process.env.HOST || '0.0.0.0';
+const esp32BaseUrl = process.env.ESP32_BASE_URL || '';
 const app = createApp({
   rootDir,
   dataFile: process.env.DATA_FILE || path.join(rootDir, 'backend', 'data', 'state.json'),
-  esp32BaseUrl: process.env.ESP32_BASE_URL || '',
+  esp32BaseUrl,
   esp32TimeoutMs: envNumber('ESP32_TIMEOUT_MS', 2500),
-  syncFromEsp32: process.env.SYNC_FROM_ESP32 === 'true',
+  syncFromEsp32: envBoolean('SYNC_FROM_ESP32', Boolean(esp32BaseUrl)),
   config: {
     temperatureThreshold: envNumber(
       'TEMPERATURE_THRESHOLD',

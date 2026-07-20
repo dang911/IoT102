@@ -63,6 +63,17 @@ class Esp32Gateway {
       body: JSON.stringify({ status: status ? 'ON' : 'OFF' })
     });
   }
+
+  readConfig() {
+    return this.request('/api/config');
+  }
+
+  updateConfig(config) {
+    return this.request('/api/config', {
+      method: 'PATCH',
+      body: JSON.stringify(config)
+    });
+  }
 }
 
 module.exports = {

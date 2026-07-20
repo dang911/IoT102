@@ -418,3 +418,37 @@ test('ESP32 firmware status with uptime timestamp and divided dust voltage syncs
     syncFromEsp32: true
   });
 });
+
+test('configuration API reads from and writes to the ESP32 gateway', async () => {
+  const calls = [];
+  const gateway = {
+    enabled: true,
+    async readConfig() {
+      calls.push({ method: 'GET' });
+      return { temperatureThreshold: 36, persistent: true };
+    },
+    async updateConfig(config) {
+      calls.push({ method: 'PATCH', config });
+      return { ...config, persistent: true };
+    }
+  };
+
+  await withServer(async (baseUrl) => {
+    const current = await request(baseUrl, '/api/config');
+    assert.equal(current.status, 200);
+    assert.equal(current.data.hardware.synced, true);
+    assert.equal(current.data.hardware.response.temperatureThreshold, 36);
+
+    const updated = await request(baseUrl, '/api/config', {
+      method: 'PATCH',
+      body: JSON.stringify({ temperatureThreshold: 37 })
+    });
+    assert.equal(updated.status, 200);
+    assert.equal(updated.data.thresholds.temperature, 37);
+    assert.equal(updated.data.hardware.synced, true);
+    assert.deepEqual(calls, [
+      { method: 'GET' },
+      { method: 'PATCH', config: { temperatureThreshold: 37 } }
+    ]);
+  }, { gateway });
+});

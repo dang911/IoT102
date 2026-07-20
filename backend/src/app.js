@@ -337,7 +337,11 @@ function createApp(options = {}) {
       }
 
       if (url.pathname === '/api/config' && request.method === 'GET') {
-        sendJson(response, 200, store.snapshot().config);
+        const config = store.snapshot().config;
+        const hardware = gateway.enabled
+          ? await safeHardware(() => gateway.readConfig(), hardwareCallbacks)
+          : null;
+        sendJson(response, 200, withHardware(config, hardware));
         return;
       }
 
@@ -346,7 +350,14 @@ function createApp(options = {}) {
         (request.method === 'PATCH' || request.method === 'POST')
       ) {
         const body = await parseJsonBody(request);
-        sendJson(response, 200, store.updateConfig(body));
+        const status = store.updateConfig(body);
+        const hardware = gateway.enabled
+          ? await safeHardware(
+            () => gateway.updateConfig(body),
+            hardwareCallbacks
+          )
+          : null;
+        sendJson(response, 200, withHardware(status, hardware));
         return;
       }
 
