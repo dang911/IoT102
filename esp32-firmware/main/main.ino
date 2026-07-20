@@ -38,7 +38,7 @@ void setup() {
   WiFiManager wifiManager;
 
   // Reset WiFi settings (uncomment để reset, sau đó comment lại)
-  // wifiManager.resetSettings();
+  wifiManager.resetSettings();
 
   // Auto connect với SSID & password đã lưu, hoặc mở portal
   if (!wifiManager.autoConnect("SmartHome-Setup")) {
