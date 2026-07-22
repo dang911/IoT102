@@ -188,6 +188,13 @@ void updateDustSensor() {
   DustRawReading medianReading = readingFromRaw(medianRaw, nowUs);
   sampleCount = 0;
 
+  // Preserve the latest electrical measurements even when validation fails.
+  // This makes wiring, rail saturation and divider faults visible in the API
+  // and Serial Monitor instead of reporting an unhelpful zero value.
+  dustSensorState.rawAdc = medianReading.rawAdc;
+  dustSensorState.adcVoltage = medianReading.adcVoltage;
+  dustSensorState.voltage = medianReading.sensorVoltage;
+
   if (validSamples < DUST_MIN_VALID_SAMPLES ||
       !validateDustReading(medianReading)) {
     markInvalidBatch(saturated);
@@ -200,9 +207,6 @@ void updateDustSensor() {
     return;
   }
 
-  dustSensorState.rawAdc = medianReading.rawAdc;
-  dustSensorState.adcVoltage = medianReading.adcVoltage;
-  dustSensorState.voltage = medianReading.sensorVoltage;
   dustSensorState.density = density;
   dustSensorState.sensorOnline = true;
   dustSensorState.abnormal = false;

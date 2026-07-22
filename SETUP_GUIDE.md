@@ -335,7 +335,7 @@ Không commit mật khẩu Wi-Fi thật lên repository công khai.
 Firmware in kết quả đo mỗi giây trên một dòng:
 
 ```text
-[SENSORS] temp=29.5C rawTemp=366 light=420 rawLight=1720 dust=85.5ug/m3 dustAdc=1234 dustVo=1.421V motion=NO mode=AUTO led=OFF buzzer=OFF
+[SENSORS] temp=29.5C rawTemp=366 light=420 rawLight=1720 dust=85.5ug/m3 dustAdc=1234 dustAdcV=0.775V dustVo=1.421V motion=NO mode=AUTO led=OFF buzzer=OFF
 ```
 
 `ERROR` xuất hiện thay cho giá trị khi firmware đánh dấu cảm biến offline/bất thường. Có thể thay chu kỳ log bằng `SERIAL_MONITOR_INTERVAL_MS` trong `Config.h`.

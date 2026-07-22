@@ -158,6 +158,9 @@ void printSensorReadings(bool force = false) {
   }
   Serial.print(" dustAdc=");
   Serial.print(dustSensorState.rawAdc);
+  Serial.print(" dustAdcV=");
+  Serial.print(dustSensorState.adcVoltage, 3);
+  Serial.print("V");
   Serial.print(" dustVo=");
   Serial.print(dustSensorState.voltage, 3);
   Serial.print("V motion=");
