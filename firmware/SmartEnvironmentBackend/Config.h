@@ -12,7 +12,9 @@ constexpr uint8_t DUST_ANALOG_PIN = 32;   // ADC1_CH4
 constexpr uint8_t DUST_LED_PIN = 25;      // Open-drain, active LOW
 constexpr uint8_t LIGHT_LED_PIN = 2;
 constexpr uint8_t PIR_PIN = 27;           // HC-SR501 digital output
-constexpr uint8_t BUZZER_PIN = 26;        // Active buzzer module signal
+// TMB12A05 active electromagnetic buzzer (5 V, up to about 30 mA).
+// GPIO26 drives an external NPN/MOSFET; never power the buzzer from the GPIO.
+constexpr uint8_t BUZZER_PIN = 26;
 constexpr uint8_t LCD_SDA_PIN = 21;
 constexpr uint8_t LCD_SCL_PIN = 22;
 

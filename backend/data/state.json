@@ -33,6 +33,7 @@
   "latest": {
     "temperature": 28,
     "lightLevel": 420,
+    "motionDetected": false,
     "dust": {
       "rawAdc": null,
       "adcVoltage": null,
@@ -72,6 +73,7 @@
     {
       "temperature": 28,
       "lightLevel": 420,
+      "motionDetected": false,
       "dust": {
         "rawAdc": null,
         "adcVoltage": null,
@@ -182,8 +184,8 @@
   },
   "nextNotificationId": 3,
   "connection": {
-    "enabled": false,
-    "esp32Online": null,
+    "enabled": true,
+    "esp32Online": false,
     "lastSeen": null,
     "lastError": null
   },
