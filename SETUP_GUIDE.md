@@ -313,7 +313,7 @@ Nếu firmware dùng thư viện LCD, cài đúng package được nêu trong lo
 Trước khi nạp, kiểm tra các giá trị tập trung:
 
 - Wi-Fi SSID/password.
-- Pins 34, 35, 32, 25, 2, 21, 22.
+- Pins 34, 35, 32, 25, 26, 27, 2, 21, 22.
 - `LED_ACTIVE_HIGH` và cực tính chân LED bụi.
 - Địa chỉ LCD `0x27` hoặc `0x3F`.
 - Divider 10 kΩ/12 kΩ.
@@ -331,6 +331,14 @@ Không commit mật khẩu Wi-Fi thật lên repository công khai.
 5. Ghi lại IP được cấp.
 6. Kiểm tra LCD luân phiên ba màn hình và không nhấp nháy do clear liên tục.
 7. Mở dashboard tại IP ESP32.
+
+Firmware in kết quả đo mỗi giây trên một dòng:
+
+```text
+[SENSORS] temp=29.5C rawTemp=366 light=420 rawLight=1720 dust=85.5ug/m3 dustAdc=1234 dustVo=1.421V motion=NO mode=AUTO led=OFF buzzer=OFF
+```
+
+`ERROR` xuất hiện thay cho giá trị khi firmware đánh dấu cảm biến offline/bất thường. Có thể thay chu kỳ log bằng `SERIAL_MONITOR_INTERVAL_MS` trong `Config.h`.
 
 ## 9. LCD1602
 

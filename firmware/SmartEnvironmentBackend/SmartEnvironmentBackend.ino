@@ -81,6 +81,7 @@ uint32_t lastWifiRetryMs = 0;
 uint32_t lastLcdRefreshMs = 0;
 uint32_t lastLcdPageChangeMs = 0;
 uint32_t lastBuzzerToggleMs = 0;
+uint32_t lastSerialMonitorMs = 0;
 uint8_t lcdPage = 0;
 String lastLcdLine1;
 String lastLcdLine2;
@@ -120,6 +121,53 @@ void updateBuzzer() {
     writeBuzzer(!buzzerStatus);
     lastBuzzerToggleMs = nowMs;
   }
+}
+
+void printSensorReadings(bool force = false) {
+  const uint32_t nowMs = millis();
+  if (!force &&
+      static_cast<uint32_t>(nowMs - lastSerialMonitorMs) <
+          SERIAL_MONITOR_INTERVAL_MS) {
+    return;
+  }
+  lastSerialMonitorMs = nowMs;
+
+  Serial.print("[SENSORS] temp=");
+  if (temperatureSensor.online) {
+    Serial.print(temperatureC, 1);
+    Serial.print("C");
+  } else {
+    Serial.print("ERROR");
+  }
+  Serial.print(" rawTemp=");
+  Serial.print(temperatureSensor.rawAdc);
+  Serial.print(" light=");
+  if (lightSensor.online) {
+    Serial.print(lightLevel);
+  } else {
+    Serial.print("ERROR");
+  }
+  Serial.print(" rawLight=");
+  Serial.print(lightSensor.rawAdc);
+  Serial.print(" dust=");
+  if (dustSensorState.sensorOnline) {
+    Serial.print(dustSensorState.density, 1);
+    Serial.print("ug/m3");
+  } else {
+    Serial.print("ERROR");
+  }
+  Serial.print(" dustAdc=");
+  Serial.print(dustSensorState.rawAdc);
+  Serial.print(" dustVo=");
+  Serial.print(dustSensorState.voltage, 3);
+  Serial.print("V motion=");
+  Serial.print(motionDetected ? "YES" : "NO");
+  Serial.print(" mode=");
+  Serial.print(mode);
+  Serial.print(" led=");
+  Serial.print(lightStatus ? "ON" : "OFF");
+  Serial.print(" buzzer=");
+  Serial.println(buzzerStatus ? "ON" : "OFF");
 }
 
 String temperatureStatus() {
@@ -1018,6 +1066,7 @@ void setup() {
 
   readEnvironmentSensors(true);
   updateDustSensor();
+  printSensorReadings(true);
   updateLcd(true);
   connectWifi();
   setupRoutes();
@@ -1034,6 +1083,7 @@ void loop() {
   updateDustSensor();
   readEnvironmentSensors();
   updateBuzzer();
+  printSensorReadings();
   updateLcd();
   reconnectWifiIfNeeded();
   delay(1);
