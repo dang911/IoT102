@@ -69,7 +69,9 @@ constexpr float DEFAULT_DUST_MODERATE_UG_M3 = 50.0f;
 constexpr float DEFAULT_DUST_HIGH_UG_M3 = 150.0f;
 constexpr float DEFAULT_DUST_DANGEROUS_UG_M3 = 300.0f;
 
-constexpr uint32_t ENVIRONMENT_SENSOR_INTERVAL_MS = 1000;
+// Keep light changes responsive while leaving enough time for ADC averaging
+// and the synchronous HTTP server to run smoothly.
+constexpr uint32_t ENVIRONMENT_SENSOR_INTERVAL_MS = 250;
 constexpr uint8_t ENVIRONMENT_AVERAGE_SAMPLES = 8;
 constexpr uint32_t WIFI_CONNECT_TIMEOUT_MS = 15000;
 constexpr uint32_t WIFI_RETRY_INTERVAL_MS = 10000;

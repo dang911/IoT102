@@ -1,7 +1,7 @@
 (function bootstrapApplication(window, document) {
     'use strict';
 
-    const STATUS_POLL_MS = 2500;
+    const STATUS_POLL_MS = 750;
     const BACKGROUND_POLL_MS = 10000;
     let pollTimer = null;
     let statusRequest = null;
