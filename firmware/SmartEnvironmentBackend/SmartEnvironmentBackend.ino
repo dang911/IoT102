@@ -26,7 +26,7 @@ using namespace ProjectConfig;
 
 namespace {
 
-constexpr const char* FIRMWARE_VERSION = "2.0.0";
+constexpr const char* FIRMWARE_VERSION = "2.1.0";
 constexpr size_t MAX_JSON_BODY_BYTES = 1024;
 
 struct RuntimeConfig {
@@ -67,6 +67,7 @@ Lcd1602I2C lcd;
 String mode = "AUTO";
 bool lightStatus = false;
 bool motionDetected = false;
+bool buzzerStatus = false;
 float temperatureC = 0.0f;
 int lightLevel = 0;
 AnalogSensorHealth temperatureSensor = {};
@@ -79,6 +80,7 @@ uint32_t lastEnvironmentReadMs = 0;
 uint32_t lastWifiRetryMs = 0;
 uint32_t lastLcdRefreshMs = 0;
 uint32_t lastLcdPageChangeMs = 0;
+uint32_t lastBuzzerToggleMs = 0;
 uint8_t lcdPage = 0;
 String lastLcdLine1;
 String lastLcdLine2;
@@ -91,6 +93,33 @@ bool isConfiguredWifi() {
 void writeLightLed(bool enabled) {
   const uint8_t activeLevel = LIGHT_LED_ACTIVE_HIGH ? HIGH : LOW;
   digitalWrite(LIGHT_LED_PIN, enabled ? activeLevel : !activeLevel);
+}
+
+void writeBuzzer(bool enabled) {
+  const uint8_t activeLevel = BUZZER_ACTIVE_HIGH ? HIGH : LOW;
+  digitalWrite(BUZZER_PIN, enabled ? activeLevel : !activeLevel);
+  buzzerStatus = enabled;
+}
+
+void updateBuzzer() {
+  const bool temperatureHigh =
+      temperatureSensor.online &&
+      temperatureC > runtimeConfig.temperatureThreshold;
+  if (!motionDetected && !temperatureHigh) {
+    writeBuzzer(false);
+    lastBuzzerToggleMs = millis();
+    return;
+  }
+
+  // Intruder alerts have priority and use a faster pattern than overheat.
+  const uint32_t intervalMs = motionDetected
+                                  ? BUZZER_INTRUDER_TOGGLE_MS
+                                  : BUZZER_TEMPERATURE_TOGGLE_MS;
+  const uint32_t nowMs = millis();
+  if (static_cast<uint32_t>(nowMs - lastBuzzerToggleMs) >= intervalMs) {
+    writeBuzzer(!buzzerStatus);
+    lastBuzzerToggleMs = nowMs;
+  }
 }
 
 String temperatureStatus() {
@@ -328,6 +357,7 @@ void populateStatusDocument(JsonDocument& document) {
   document["lightLevel"] = lightLevel;
   document["lightStatus"] = lightStatus;
   document["motionDetected"] = motionDetected;
+  document["buzzerStatus"] = buzzerStatus;
   document["mode"] = mode;
   document["temperatureStatus"] = tempState;
   document["lightEnvironment"] = environment;
@@ -407,6 +437,7 @@ void populateStatusDocument(JsonDocument& document) {
                                lightSensor.abnormal ||
                                dustSensorState.abnormal;
   alerts["intruderDetected"] = motionDetected;
+  alerts["buzzerActive"] = buzzerStatus;
 
   JsonObject thresholds = document["thresholds"].to<JsonObject>();
   thresholds["temperature"] = runtimeConfig.temperatureThreshold;
@@ -969,7 +1000,9 @@ void setup() {
 
   pinMode(LIGHT_LED_PIN, OUTPUT);
   pinMode(PIR_PIN, INPUT);
+  pinMode(BUZZER_PIN, OUTPUT);
   writeLightLed(false);
+  writeBuzzer(false);
   analogReadResolution(12);
   analogSetPinAttenuation(LM35_PIN, ADC_6db);
   analogSetPinAttenuation(LDR_PIN, ADC_11db);
@@ -1000,6 +1033,7 @@ void loop() {
   motionDetected = digitalRead(PIR_PIN) == HIGH;
   updateDustSensor();
   readEnvironmentSensors();
+  updateBuzzer();
   updateLcd();
   reconnectWifiIfNeeded();
   delay(1);

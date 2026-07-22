@@ -12,10 +12,14 @@ constexpr uint8_t DUST_ANALOG_PIN = 32;   // ADC1_CH4
 constexpr uint8_t DUST_LED_PIN = 25;      // Open-drain, active LOW
 constexpr uint8_t LIGHT_LED_PIN = 2;
 constexpr uint8_t PIR_PIN = 27;           // HC-SR501 digital output
+constexpr uint8_t BUZZER_PIN = 26;        // Active buzzer module signal
 constexpr uint8_t LCD_SDA_PIN = 21;
 constexpr uint8_t LCD_SCL_PIN = 22;
 
 constexpr bool LIGHT_LED_ACTIVE_HIGH = true;
+constexpr bool BUZZER_ACTIVE_HIGH = true;
+constexpr uint32_t BUZZER_INTRUDER_TOGGLE_MS = 150;
+constexpr uint32_t BUZZER_TEMPERATURE_TOGGLE_MS = 500;
 
 // Common PCF8574 LCD1602 backpack address. Change to 0x3F if an I2C scan of
 // the actual backpack reports that address.
