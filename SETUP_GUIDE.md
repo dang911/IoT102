@@ -200,7 +200,7 @@ OUT của HC-SR501 thường ở mức khoảng 3,3 V khi phát hiện chuyển 
 
 Tài liệu kỹ thuật tra được dùng mã **TMB12A05**: còi điện từ chủ động hai chân, điện áp định mức 5 V, dải hoạt động 4–8 V và dòng tối đa khoảng 30 mA. Nếu chữ trên linh kiện thực tế là `TMB12A50`, cần kiểm tra lại ảnh/nhãn hoặc datasheet của nhà cung cấp vì không nên mặc định hai mã có cùng thông số. Firmware điều khiển transistor bằng GPIO26: HIGH thì còi kêu, LOW thì còi tắt.
 
-#### Sơ đồ lắp qua transistor NPN
+#### Sơ đồ lắp qua transistor NPN C828
 
 Nhận biết chân:
 
@@ -208,17 +208,17 @@ Nhận biết chân:
 - Chân có dấu `-` hoặc chân ngắn hơn là cực âm.
 - TMB12A05 là active buzzer nên chỉ cần cấp DC đúng cực để phát âm liên tục.
 
-Không cấp còi trực tiếp từ GPIO26. Dùng transistor NPN như BC547, C1815 hoặc 2N2222:
+Không cấp còi trực tiếp từ GPIO26. Dùng transistor NPN **C828 (2SC828)** làm khóa đóng/cắt phía GND:
 
 ```text
 ESP32 5V ───────────────────── TMB12A05 (+)
-                                  TMB12A05 (-) ─── Collector transistor
-ESP32 GPIO26 ─── 1 kΩ ───────── Base transistor
-                                Emitter transistor ─── GND chung
+                                  TMB12A05 (-) ─── Collector (C) C828
+ESP32 GPIO26 ─── 1 kΩ ───────── Base (B) C828
+                                Emitter (E) C828 ─── GND chung
 ESP32 GPIO26 ─── 10 kΩ ───────── GND chung (pull-down, khuyến nghị)
 ```
 
-Với transistor có sẵn, phải tra đúng thứ tự chân `E-B-C` của chính linh kiện đang dùng; BC547, C1815 và 2N2222 không phải lúc nào cũng có cùng pinout giữa các package/nhà sản xuất. Nối chung GND của nguồn 5 V và ESP32. Vì TMB12A05 là còi điện từ, nên mắc diode 1N4148/1N4007 song song ngược cực với còi: cathode về `+5V`, anode về phía collector.
+Phải tra datasheet hoặc đo để xác định đúng các chân `E-B-C` của chiếc C828 đang dùng; không suy đoán thứ tự chân chỉ theo mặt phẳng của vỏ transistor vì pinout có thể khác theo package/nhà sản xuất. Nối chung GND của nguồn 5 V và ESP32. Vì TMB12A05 là còi điện từ, nên mắc diode 1N4148/1N4007 song song ngược cực với còi: cathode về `+5V`, anode về Collector (C) của C828.
 
 Không nối TMB12A05 trực tiếp giữa GPIO26 và GND: dòng định mức có thể vượt khả năng cấp dòng an toàn của GPIO. Firmware mặc định đúng cho active buzzer và không cần tạo PWM/tone 2,3 kHz; mạch dao động đã nằm bên trong còi.
 
