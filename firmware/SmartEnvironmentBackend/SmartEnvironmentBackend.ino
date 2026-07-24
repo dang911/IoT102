@@ -47,7 +47,9 @@ void readSensors(bool force = false) {
   }
   lastSensorReadMs = nowMs;
 
-  temperatureC = static_cast<float>(averageMilliVolts(LM35_PIN)) / 10.0f;
+  temperatureC =
+      static_cast<float>(averageMilliVolts(LM35_PIN)) / 10.0f +
+      LM35_TEMPERATURE_OFFSET_C;
   lightLevel = map(averageRawAdc(LDR_PIN), 0, ADC_MAX_RAW, 0, 1000);
 
   if (lightLevel < DEFAULT_DARK_THRESHOLD) {
