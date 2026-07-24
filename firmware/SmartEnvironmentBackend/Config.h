@@ -17,6 +17,7 @@ constexpr uint8_t LCD_SCL_PIN = 22;
 
 constexpr bool LIGHT_LED_ACTIVE_HIGH = true;
 constexpr bool BUZZER_ACTIVE_HIGH = true;
+constexpr bool OVERHEAT_BUZZER_ENABLED = true;
 constexpr uint32_t BUZZER_TEMPERATURE_TOGGLE_MS = 500;
 
 // Common PCF8574 LCD1602 backpack address. Change to 0x3F if an I2C scan of

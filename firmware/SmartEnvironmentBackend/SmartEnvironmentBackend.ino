@@ -17,9 +17,11 @@ bool lcdOnline = false;
 float temperatureC = 0.0f;
 int lightLevel = 0;
 bool lightStatus = false;
+bool buzzerStatus = false;
 String operatingMode = "AUTO";
 uint32_t lastSensorReadMs = 0;
 uint32_t lastLcdRefreshMs = 0;
+uint32_t lastBuzzerToggleMs = 0;
 
 uint16_t averageRawAdc(uint8_t pin) {
   uint32_t total = 0;
@@ -41,6 +43,29 @@ void setLight(bool enabled) {
   lightStatus = enabled;
   const uint8_t activeLevel = LIGHT_LED_ACTIVE_HIGH ? HIGH : LOW;
   digitalWrite(LIGHT_LED_PIN, enabled ? activeLevel : !activeLevel);
+}
+
+void setBuzzer(bool enabled) {
+  buzzerStatus = enabled;
+  const uint8_t activeLevel = BUZZER_ACTIVE_HIGH ? HIGH : LOW;
+  digitalWrite(BUZZER_PIN, enabled ? activeLevel : !activeLevel);
+}
+
+void updateOverheatBuzzer() {
+  const bool overheat =
+      OVERHEAT_BUZZER_ENABLED &&
+      temperatureC >= DEFAULT_TEMPERATURE_THRESHOLD_C;
+  if (!overheat) {
+    setBuzzer(false);
+    return;
+  }
+
+  const uint32_t nowMs = millis();
+  if (static_cast<uint32_t>(nowMs - lastBuzzerToggleMs) >=
+      BUZZER_TEMPERATURE_TOGGLE_MS) {
+    lastBuzzerToggleMs = nowMs;
+    setBuzzer(!buzzerStatus);
+  }
 }
 
 void readSensors(bool force = false) {
@@ -76,6 +101,8 @@ String statusJson() {
   json += ",\"lightLevel\":" + String(lightLevel);
   json += ",\"lightStatus\":";
   json += lightStatus ? "true" : "false";
+  json += ",\"buzzerStatus\":";
+  json += buzzerStatus ? "true" : "false";
   json += ",\"mode\":\"" + operatingMode + "\"";
   json += ",\"temperatureStatus\":\"";
   json += temperatureHigh ? "HIGH" : "NORMAL";
@@ -198,7 +225,9 @@ void setup() {
   Serial.println("Smart Environment ESP32 firmware starting");
 
   pinMode(LIGHT_LED_PIN, OUTPUT);
+  pinMode(BUZZER_PIN, OUTPUT);
   setLight(false);
+  setBuzzer(false);
 
   analogReadResolution(12);
   analogSetPinAttenuation(LM35_PIN, ADC_6db);
@@ -236,6 +265,7 @@ void setup() {
 void loop() {
   server.handleClient();
   readSensors();
+  updateOverheatBuzzer();
   updateLcd();
   printReadings();
   delay(10);
