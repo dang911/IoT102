@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <WiFi.h>
 #include <Wire.h>
 
 #include "Config.h"
@@ -117,6 +118,16 @@ void setup() {
     Serial.print("Khong tim thay LCD tai dia chi 0x");
     Serial.println(LCD_I2C_ADDRESS, HEX);
     Serial.println("Thu doi LCD_I2C_ADDRESS trong Config.h thanh 0x3F.");
+  }
+
+  WiFi.mode(WIFI_AP);
+  if (WiFi.softAP(FALLBACK_AP_SSID)) {
+    Serial.print("WiFi AP: ");
+    Serial.println(FALLBACK_AP_SSID);
+    Serial.print("Dia chi IP: ");
+    Serial.println(WiFi.softAPIP());
+  } else {
+    Serial.println("Khong the khoi tao WiFi AP.");
   }
 
   readSensors(true);
