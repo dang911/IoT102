@@ -69,8 +69,7 @@
             payload.temperature !== undefined ||
             payload.lightLevel !== undefined ||
             payload.lightStatus !== undefined ||
-            payload.mode !== undefined ||
-            payload.dust !== undefined
+            payload.mode !== undefined
         ) {
             return payload;
         }
@@ -83,8 +82,7 @@
                 (
                     candidate.temperature !== undefined ||
                     candidate.lightLevel !== undefined ||
-                    candidate.lightStatus !== undefined ||
-                    candidate.dust !== undefined
+                    candidate.lightStatus !== undefined
                 )
             ) {
                 return candidate;
@@ -94,8 +92,7 @@
         if (payload.latest && typeof payload.latest === 'object') {
             return {
                 ...payload,
-                ...payload.latest,
-                dust: payload.latest.dust || payload.dust
+                ...payload.latest
             };
         }
         return payload;
@@ -330,87 +327,6 @@
         environment.className = lowLight ? 'text-warning' : 'text-success';
     }
 
-    function dustLevelClass(level) {
-        const normalized = String(level || '').toUpperCase();
-        if (normalized === 'CLEAN') return 'badge-success';
-        if (normalized === 'MODERATE') return 'badge-warning';
-        if (normalized === 'HIGH') return 'badge-danger';
-        if (normalized === 'DANGEROUS') return 'badge-critical';
-        return 'badge-neutral';
-    }
-
-    function renderDust(data) {
-        const dust = data.dust || data.sensors?.dust || {};
-        const density = finiteNumber(firstDefined({ dust, data }, [
-            'dust.density',
-            'dust.dustDensity',
-            'data.dustDensity'
-        ]));
-        const voltage = finiteNumber(firstDefined({ dust, data }, [
-            'dust.voltage',
-            'dust.outputVoltage',
-            'data.dustVoltage'
-        ]));
-        const rawAdc = finiteNumber(firstDefined({ dust, data }, [
-            'dust.rawAdc',
-            'dust.adc',
-            'data.dustRawAdc'
-        ]));
-        const explicitOnline = firstDefined({ dust, data }, [
-            'dust.sensorOnline',
-            'dust.online',
-            'data.sensorStatus.dust',
-            'data.dustSensorOnline'
-        ]);
-        const online = setSensorState('dust', explicitOnline, density !== null);
-        const densityElement = byId('dust-value');
-
-        if (densityElement) {
-            densityElement.textContent = density !== null ? `${density.toFixed(1)} µg/m³` : '-- µg/m³';
-            densityElement.className = density !== null && online ? 'value text-dust' : 'value text-muted';
-        }
-        setText('dust-voltage', voltage !== null ? `${voltage.toFixed(3)} V` : '-- V');
-        setText('dust-raw-adc', rawAdc !== null ? String(Math.round(rawAdc)) : '--');
-
-        const level = String(firstDefined({ dust, data }, [
-            'dust.level',
-            'dust.classification',
-            'data.dustLevel'
-        ]) || 'UNAVAILABLE').toUpperCase();
-        setBadge(
-            byId('dust-level'),
-            level === 'UNKNOWN' || level === 'UNAVAILABLE' ? 'Unavailable' : level,
-            dustLevelClass(level)
-        );
-
-        const calibrated = booleanValue(firstDefined({ dust, data }, [
-            'dust.calibrated',
-            'dust.isCalibrated',
-            'data.dustCalibrated'
-        ]));
-        const calibrationElement = byId('dust-calibration');
-        if (calibrationElement) {
-            calibrationElement.textContent = calibrated === true ? 'Calibrated' : calibrated === false ? 'Not calibrated' : 'Unknown';
-            calibrationElement.className = calibrated === true ? 'text-success' : calibrated === false ? 'text-warning' : 'text-muted';
-        }
-
-        const dustTimestamp = firstDefined({ dust, data }, [
-            'dust.lastUpdate',
-            'dust.timestamp',
-            'data.dustLastUpdate'
-        ]);
-        setText('dust-last-update', formatTimestamp(dustTimestamp));
-        const timeElement = byId('dust-last-update');
-        if (timeElement && dustTimestamp) timeElement.dateTime = dustTimestamp;
-
-        const errorElement = byId('dust-error');
-        const errorMessage = firstDefined({ dust, data }, ['dust.error', 'data.sensors.dust.error']);
-        if (errorElement) {
-            errorElement.textContent = errorMessage ? `Sensor diagnostic: ${errorMessage}` : '';
-            errorElement.hidden = !errorMessage;
-        }
-    }
-
     function updateToggleButtons(containerId, activeValue) {
         const container = byId(containerId);
         if (!container) return;
@@ -519,8 +435,7 @@
             'lastUpdate',
             'updatedAt',
             'meta.timestamp',
-            'latest.timestamp',
-            'dust.lastUpdate'
+            'latest.timestamp'
         ]) || new Date().toISOString();
         state.lastTimestamp = timestamp;
         const updated = byId('last-updated');
@@ -531,7 +446,6 @@
 
         renderTemperature(data, timestamp);
         renderLight(data);
-        renderDust(data);
         renderLightingState(data);
         refreshDataAge();
         return data;

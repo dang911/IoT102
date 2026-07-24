@@ -57,53 +57,7 @@ const app = createApp({
     forecastHorizonMinutes: envNumber(
       'FORECAST_HORIZON_MINUTES',
       DEFAULT_CONFIG.forecastHorizonMinutes
-    ),
-    dustThresholds: {
-      moderate: envNumber(
-        'DUST_MODERATE_THRESHOLD',
-        DEFAULT_CONFIG.dustThresholds.moderate
-      ),
-      high: envNumber('DUST_HIGH_THRESHOLD', DEFAULT_CONFIG.dustThresholds.high),
-      dangerous: envNumber(
-        'DUST_DANGEROUS_THRESHOLD',
-        DEFAULT_CONFIG.dustThresholds.dangerous
-      )
-    },
-    dustCalibration: {
-      cleanAirVoltage: envNumber(
-        'DUST_CLEAN_AIR_VOLTAGE',
-        DEFAULT_CONFIG.dustCalibration.cleanAirVoltage
-      ),
-      sensitivity: envNumber(
-        'DUST_SENSITIVITY',
-        DEFAULT_CONFIG.dustCalibration.sensitivity
-      ),
-      calibrationFactor: envNumber(
-        'DUST_CALIBRATION_FACTOR',
-        DEFAULT_CONFIG.dustCalibration.calibrationFactor
-      ),
-      offsetUgM3: envNumber(
-        'DUST_CALIBRATION_OFFSET_UG_M3',
-        DEFAULT_CONFIG.dustCalibration.offsetUgM3
-      ),
-      calibrated: envBoolean(
-        'DUST_CALIBRATED',
-        DEFAULT_CONFIG.dustCalibration.calibrated
-      ),
-      adcReferenceVoltage: envNumber(
-        'DUST_ADC_REFERENCE_VOLTAGE',
-        DEFAULT_CONFIG.dustCalibration.adcReferenceVoltage
-      ),
-      adcMax: envNumber('DUST_ADC_MAX', DEFAULT_CONFIG.dustCalibration.adcMax),
-      voltageDividerRatio: envNumber(
-        'DUST_VOLTAGE_DIVIDER_RATIO',
-        DEFAULT_CONFIG.dustCalibration.voltageDividerRatio
-      ),
-      maxSensorVoltage: envNumber(
-        'DUST_MAX_SENSOR_VOLTAGE',
-        DEFAULT_CONFIG.dustCalibration.maxSensorVoltage
-      )
-    }
+    )
   }
 });
 

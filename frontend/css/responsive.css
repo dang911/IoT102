@@ -3,17 +3,10 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .dust-card {
-        grid-column: 1 / -1;
-    }
-
     .charts-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .chart-card:last-child {
-        grid-column: 1 / -1;
-    }
 
     .report-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -150,8 +143,6 @@
         grid-template-columns: 1fr;
     }
 
-    .dust-card,
-    .chart-card:last-child,
     .environment-forecast-card {
         grid-column: auto;
     }
@@ -291,7 +282,6 @@
         font-size: 2rem;
     }
 
-    .dust-details,
     .report-grid {
         grid-template-columns: 1fr;
     }

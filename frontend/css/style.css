@@ -25,10 +25,8 @@
     --info: #2767b1;
     --info-surface: #eaf3ff;
     --neutral-surface: #edf1f6;
-    --dust: #7655c7;
     --chart-temperature: #2f75d6;
     --chart-light: #d57a07;
-    --chart-dust: #7655c7;
     --chart-grid: rgba(101, 113, 135, 0.20);
     --ring: #7c6aef;
     --radius-sm: 0.5rem;
@@ -73,10 +71,8 @@
     --info: #8ebfff;
     --info-surface: #1a3151;
     --neutral-surface: #252f3d;
-    --dust: #beaaff;
     --chart-temperature: #72adff;
     --chart-light: #ffc461;
-    --chart-dust: #beaaff;
     --chart-grid: rgba(169, 180, 197, 0.19);
     --ring: #a596ff;
     --shadow: 0 10px 26px rgba(0, 0, 0, 0.26);
@@ -256,7 +252,6 @@ button:disabled {
 }
 
 .text-cyan { color: var(--chart-temperature); }
-.text-dust { color: var(--dust); }
 .text-success,
 .success-text { color: var(--success); }
 .text-warning,

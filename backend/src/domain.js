@@ -1,11 +1,3 @@
-const {
-  DEFAULT_DUST_CALIBRATION,
-  DEFAULT_DUST_THRESHOLDS,
-  normalizeDustCalibration,
-  normalizeDustThresholds,
-  reclassifyDustReading
-} = require('./dust');
-
 const DEFAULT_CONFIG = Object.freeze({
   temperatureThreshold: 35,
   darkThreshold: 200,
@@ -16,9 +8,7 @@ const DEFAULT_CONFIG = Object.freeze({
   sensorOfflineTimeoutMs: 60 * 1000,
   forecastWindowSize: 12,
   forecastMinSamples: 4,
-  forecastHorizonMinutes: 15,
-  dustThresholds: DEFAULT_DUST_THRESHOLDS,
-  dustCalibration: DEFAULT_DUST_CALIBRATION
+  forecastHorizonMinutes: 15
 });
 
 class HttpError extends Error {
@@ -126,39 +116,13 @@ function normalizeMotionDetected(payload = {}, fallback = false) {
 }
 
 function cloneDefaultConfig() {
-  return {
-    ...DEFAULT_CONFIG,
-    dustThresholds: { ...DEFAULT_DUST_THRESHOLDS },
-    dustCalibration: { ...DEFAULT_DUST_CALIBRATION }
-  };
+  return { ...DEFAULT_CONFIG };
 }
 
 function normalizeConfigPatch(payload = {}, currentConfig = cloneDefaultConfig()) {
-  if (payload.dustThresholds !== undefined && (
-    !payload.dustThresholds ||
-    typeof payload.dustThresholds !== 'object' ||
-    Array.isArray(payload.dustThresholds)
-  )) {
-    throw new HttpError(400, 'dustThresholds must be an object');
-  }
-  if (payload.dustCalibration !== undefined && (
-    !payload.dustCalibration ||
-    typeof payload.dustCalibration !== 'object' ||
-    Array.isArray(payload.dustCalibration)
-  )) {
-    throw new HttpError(400, 'dustCalibration must be an object');
-  }
   const next = {
     ...cloneDefaultConfig(),
-    ...(currentConfig || {}),
-    dustThresholds: {
-      ...DEFAULT_DUST_THRESHOLDS,
-      ...((currentConfig && currentConfig.dustThresholds) || {})
-    },
-    dustCalibration: {
-      ...DEFAULT_DUST_CALIBRATION,
-      ...((currentConfig && currentConfig.dustCalibration) || {})
-    }
+    ...(currentConfig || {})
   };
 
   if (payload.temperatureThreshold !== undefined) {
@@ -221,52 +185,6 @@ function normalizeConfigPatch(payload = {}, currentConfig = cloneDefaultConfig()
       toNumber(payload.forecastHorizonMinutes, 'forecastHorizonMinutes', 1, 1440)
     );
   }
-
-  const thresholdPatch = {
-    ...(payload.dustThresholds || {})
-  };
-  if (payload.dustModerateThreshold !== undefined) {
-    thresholdPatch.moderate = payload.dustModerateThreshold;
-  }
-  if (payload.dustHighThreshold !== undefined) {
-    thresholdPatch.high = payload.dustHighThreshold;
-  }
-  if (payload.dustDangerousThreshold !== undefined) {
-    thresholdPatch.dangerous = payload.dustDangerousThreshold;
-  }
-  next.dustThresholds = normalizeDustThresholds(
-    thresholdPatch,
-    next.dustThresholds
-  );
-
-  const calibrationPatch = {
-    ...(payload.dustCalibration || {})
-  };
-  if (payload.cleanAirVoltage !== undefined) {
-    calibrationPatch.cleanAirVoltage = payload.cleanAirVoltage;
-  }
-  if (payload.dustZeroVoltage !== undefined) {
-    calibrationPatch.cleanAirVoltage = payload.dustZeroVoltage;
-  }
-  if (payload.dustSensitivity !== undefined) {
-    calibrationPatch.sensitivity = payload.dustSensitivity;
-  }
-  if (payload.calibrationFactor !== undefined) {
-    calibrationPatch.calibrationFactor = payload.calibrationFactor;
-  }
-  if (payload.dustCalibrationFactor !== undefined) {
-    calibrationPatch.calibrationFactor = payload.dustCalibrationFactor;
-  }
-  if (payload.dustCalibrationOffset !== undefined) {
-    calibrationPatch.offsetUgM3 = payload.dustCalibrationOffset;
-  }
-  if (payload.dustCalibrated !== undefined) {
-    calibrationPatch.calibrated = payload.dustCalibrated;
-  }
-  next.dustCalibration = normalizeDustCalibration(
-    calibrationPatch,
-    next.dustCalibration
-  );
 
   if (next.brightThreshold <= next.darkThreshold) {
     throw new HttpError(
@@ -337,13 +255,6 @@ function calculateMetrics(history) {
       ? NaN
       : item.lightLevel;
   }), 0);
-  const dust = summarize(
-    history.map((item) =>
-      item.dust && item.dust.valid !== false ? item.dust.density : NaN
-    ),
-    1
-  );
-
   return {
     sampleCount: temperature.count,
     maxTemperature: temperature.max,
@@ -351,11 +262,7 @@ function calculateMetrics(history) {
     avgTemperature: temperature.average,
     maxLightLevel: light.max,
     minLightLevel: light.min,
-    avgLightLevel: light.average,
-    dustSampleCount: dust.count,
-    maxDustDensity: dust.max,
-    minDustDensity: dust.min,
-    avgDustDensity: dust.average
+    avgLightLevel: light.average
   };
 }
 
@@ -380,18 +287,6 @@ function buildStatus(state, now = new Date().toISOString()) {
   const temperature = Number(latest.temperature);
   const lightLevel = Number(latest.lightLevel);
 
-  const dust = reclassifyDustReading(
-    latest.dust,
-    state.config.dustThresholds
-  );
-  const dustFresh = timestampIsFresh(dust.lastUpdate, nowMs, timeoutMs);
-  dust.sensorOnline = Boolean(dust.sensorOnline && dust.valid && dustFresh);
-  if (!dust.sensorOnline && dust.valid && !dustFresh) {
-    dust.error = 'STALE_DATA';
-  }
-  const dustHigh = dust.sensorOnline &&
-    Number(dust.density) >= state.config.dustThresholds.high;
-  const dustSensorOffline = !dust.sensorOnline;
   const temperatureAbnormal = Boolean(temperatureMetadata.abnormal);
   const lightAbnormal = Boolean(lightMetadata.abnormal);
   const temperatureOnline =
@@ -407,17 +302,10 @@ function buildStatus(state, now = new Date().toISOString()) {
   const temperatureHigh = temperatureOnline &&
     temperature > state.config.temperatureThreshold;
   const lowLight = lightOnline && lightLevel < state.config.darkThreshold;
-  const sensorAbnormal = temperatureAbnormal || lightAbnormal || Boolean(dust.abnormal);
+  const sensorAbnormal = temperatureAbnormal || lightAbnormal;
   const motionDetected = Boolean(latest.motionDetected);
 
-  let environmentQuality = 'NORMAL';
-  if (dust.level === 'DANGEROUS') {
-    environmentQuality = 'DANGEROUS';
-  } else if (dustHigh || temperatureHigh) {
-    environmentQuality = 'POOR';
-  } else if (dust.level === 'MODERATE') {
-    environmentQuality = 'MODERATE';
-  }
+  const environmentQuality = temperatureHigh ? 'POOR' : 'NORMAL';
 
   return {
     temperature: Number.isFinite(temperature) ? temperature : null,
@@ -428,7 +316,6 @@ function buildStatus(state, now = new Date().toISOString()) {
     source: latest.source || 'unknown',
     dataMode: latest.dataMode || normalizeDataMode(undefined, latest.source),
     motionDetected,
-    dust,
     sensors: {
       temperature: {
         online: temperatureOnline,
@@ -441,12 +328,6 @@ function buildStatus(state, now = new Date().toISOString()) {
         abnormal: lightAbnormal,
         lastUpdate: lightLastUpdate,
         error: lightMetadata.error || null
-      },
-      dust: {
-        online: dust.sensorOnline,
-        abnormal: Boolean(dust.abnormal),
-        lastUpdate: dust.lastUpdate,
-        error: dust.error
       }
     },
     connection: {
@@ -461,14 +342,11 @@ function buildStatus(state, now = new Date().toISOString()) {
     status: {
       temperature: temperatureHigh ? 'HIGH' : 'NORMAL',
       environment: lowLight ? 'DARK' : 'BRIGHT',
-      dust: dust.level,
       environmentQuality
     },
     alerts: {
       temperatureHigh,
       lowLight,
-      dustHigh,
-      dustSensorOffline,
       sensorAbnormal,
       intruderDetected: motionDetected
     },
@@ -476,8 +354,7 @@ function buildStatus(state, now = new Date().toISOString()) {
     thresholds: {
       temperature: state.config.temperatureThreshold,
       dark: state.config.darkThreshold,
-      bright: state.config.brightThreshold,
-      dust: { ...state.config.dustThresholds }
+      bright: state.config.brightThreshold
     }
   };
 }

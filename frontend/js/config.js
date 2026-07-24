@@ -32,25 +32,12 @@
     function populate(payload) {
         const config = unwrapConfig(payload);
         const thresholds = config.thresholds || {};
-        const dustThresholds = config.dustThresholds || thresholds.dust || config.dust?.thresholds || {};
-        const calibration = config.dustCalibration || config.calibration?.dust || config.dust?.calibration || {};
-
         setInput('config-temperature', first(config.temperatureThreshold, thresholds.temperature));
         setInput('config-dark', first(config.darkThreshold, thresholds.dark));
         setInput('config-bright', first(config.brightThreshold, thresholds.bright));
         setInput('config-history-limit', config.historyLimit);
-        setInput('config-dust-moderate', first(dustThresholds.moderate, config.dustModerateThreshold));
-        setInput('config-dust-high', first(dustThresholds.high, config.dustHighThreshold));
-        setInput('config-dust-dangerous', first(dustThresholds.dangerous, config.dustDangerousThreshold));
-        setInput('config-dust-baseline', first(calibration.cleanAirVoltage, calibration.baselineVoltage, config.dustBaselineVoltage));
-        setInput('config-dust-factor', first(calibration.calibrationFactor, config.dustCalibrationFactor));
-        setInput('config-dust-sensitivity', calibration.sensitivity);
-        setInput('config-adc-reference', calibration.adcReferenceVoltage);
         const cooldownMs = number(first(config.notificationCooldownMs, config.notifications?.cooldownMs));
         setInput('config-cooldown', cooldownMs === null ? '' : cooldownMs / 1000);
-        const calibrated = byId('config-dust-calibrated');
-        if (calibrated) calibrated.checked = Boolean(first(calibration.calibrated, config.dustCalibrated, false));
-
         if (window.notificationCenter && cooldownMs !== null) {
             window.notificationCenter.setCooldown(cooldownMs);
         }
@@ -98,40 +85,6 @@
         const historyLimit = readInput('config-history-limit');
         if (historyLimit !== null) payload.historyLimit = Math.round(historyLimit);
 
-        const dustValues = [
-            readInput('config-dust-moderate'),
-            readInput('config-dust-high'),
-            readInput('config-dust-dangerous')
-        ];
-        if (dustValues.some((value) => value !== null)) {
-            if (dustValues.some((value) => value === null)) {
-                throw new Error('Complete all three internal dust thresholds.');
-            }
-            const [moderate, high, dangerous] = dustValues;
-            if (!(moderate < high && high < dangerous)) {
-                throw new Error('Dust thresholds must increase: moderate < high < dangerous.');
-            }
-            payload.dustThresholds = { moderate, high, dangerous };
-        }
-
-        const baseline = readInput('config-dust-baseline');
-        const factor = readInput('config-dust-factor');
-        const sensitivity = readInput('config-dust-sensitivity');
-        const adcReference = readInput('config-adc-reference');
-        if ([baseline, factor, sensitivity, adcReference].some((value) => value !== null)) {
-            if (baseline === null || factor === null) {
-                throw new Error('Clean-air baseline and calibration factor are both required for dust calibration.');
-            }
-            if (factor <= 0) throw new Error('Calibration factor must be greater than zero.');
-            payload.dustCalibration = {
-                cleanAirVoltage: baseline,
-                calibrationFactor: factor,
-                calibrated: Boolean(byId('config-dust-calibrated')?.checked)
-            };
-            if (sensitivity !== null) payload.dustCalibration.sensitivity = sensitivity;
-            if (adcReference !== null) payload.dustCalibration.adcReferenceVoltage = adcReference;
-        }
-
         const cooldownSeconds = readInput('config-cooldown');
         if (cooldownSeconds !== null) payload.notificationCooldownMs = Math.round(cooldownSeconds * 1000);
         return payload;
@@ -146,7 +99,7 @@
             const payload = await state.api.getConfig();
             populate(payload);
             state.available = true;
-            setStatus('Configuration loaded. Values are controller settings, not official AQI thresholds.', 'success');
+            setStatus('Controller configuration loaded.', 'success');
         } catch (error) {
             state.available = false;
             setStatus(

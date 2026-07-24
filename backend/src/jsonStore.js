@@ -13,12 +13,6 @@ const {
   normalizeMode,
   normalizeReading
 } = require('./domain');
-const {
-  createOfflineDust,
-  extractDustPayload,
-  normalizeDustReading,
-  reclassifyDustReading
-} = require('./dust');
 const { buildForecast } = require('./forecast');
 const {
   applyNotificationCandidates,
@@ -111,9 +105,6 @@ function initialState(config = {}, now = new Date().toISOString()) {
     temperature: 28,
     lightLevel: 420,
     motionDetected: false,
-    dust: createOfflineDust({
-      calibrated: mergedConfig.dustCalibration.calibrated
-    }),
     sensors: readingSensorMetadata({}, now),
     timestamp: now,
     source: 'simulation',
@@ -191,28 +182,6 @@ class JsonStore {
     }
   }
 
-  migrateDust(entry, config, timestamp) {
-    try {
-      const extracted = extractDustPayload(entry || {});
-      if (extracted === null) {
-        return createOfflineDust({
-          calibrated: config.dustCalibration.calibrated
-        });
-      }
-      return normalizeDustReading(
-        { dust: extracted },
-        config,
-        timestamp
-      );
-    } catch (error) {
-      return createOfflineDust({
-        lastUpdate: timestamp,
-        error: 'MIGRATION_INVALID_DATA',
-        calibrated: config.dustCalibration.calibrated
-      });
-    }
-  }
-
   migrateReading(entry, fallback, config, mode, lightStatus, now) {
     const source = String((entry && entry.source) || fallback.source || 'simulation');
     const timestamp = validTimestamp(
@@ -240,7 +209,6 @@ class JsonStore {
         ? lightLevel
         : Number(fallback.lightLevel),
       motionDetected: normalizeMotionDetected(entry || {}, fallback.motionDetected),
-      dust: this.migrateDust(entry, config, timestamp),
       sensors: readingSensorMetadata(entry || {}, timestamp),
       timestamp,
       source,
@@ -270,15 +238,7 @@ class JsonStore {
     try {
       config = createConfig({
         ...this.defaultConfig,
-        ...(parsed.config || {}),
-        dustThresholds: {
-          ...this.defaultConfig.dustThresholds,
-          ...((parsed.config && parsed.config.dustThresholds) || {})
-        },
-        dustCalibration: {
-          ...this.defaultConfig.dustCalibration,
-          ...((parsed.config && parsed.config.dustCalibration) || {})
-        }
+        ...(parsed.config || {})
       });
     } catch (error) {
       config = this.defaultConfig;
@@ -313,7 +273,6 @@ class JsonStore {
       temperature: latestWithMetadata.temperature,
       lightLevel: latestWithMetadata.lightLevel,
       motionDetected: latestWithMetadata.motionDetected,
-      dust: latestWithMetadata.dust,
       sensors: latestWithMetadata.sensors,
       timestamp: latestWithMetadata.timestamp,
       source: latestWithMetadata.source,
@@ -333,7 +292,11 @@ class JsonStore {
       )
     );
     const notifications = Array.isArray(parsed.notifications)
-      ? parsed.notifications.filter((item) => item && typeof item.id === 'string')
+      ? parsed.notifications.filter((item) =>
+        item &&
+        typeof item.id === 'string' &&
+        !String(item.type || '').startsWith('DUST_')
+      )
         .map((item) => ({
           id: item.id,
           type: String(item.type || 'SYSTEM'),
@@ -370,7 +333,11 @@ class JsonStore {
       notifications,
       alertStates:
         parsed.alertStates && typeof parsed.alertStates === 'object'
-          ? parsed.alertStates
+          ? Object.fromEntries(
+            Object.entries(parsed.alertStates).filter(
+              ([key]) => !['dustHigh', 'dustSensorOffline'].includes(key)
+            )
+          )
           : {},
       nextNotificationId: Math.max(
         Number(parsed.nextNotificationId) || 1,
@@ -404,7 +371,11 @@ class JsonStore {
       sensorConnectionStates:
         parsed.sensorConnectionStates &&
         typeof parsed.sensorConnectionStates === 'object'
-          ? parsed.sensorConnectionStates
+          ? Object.fromEntries(
+            Object.entries(parsed.sensorConnectionStates).filter(
+              ([key]) => key !== 'dust'
+            )
+          )
           : {},
       disconnectEvents: Array.isArray(parsed.disconnectEvents)
         ? parsed.disconnectEvents
@@ -499,11 +470,9 @@ class JsonStore {
 
   recordReading(payload, source = 'api') {
     const now = this.now();
-    const normalizedDust = normalizeDustReading(payload, this.state.config, now);
     const reading = {
       ...normalizeReading(payload),
       motionDetected: normalizeMotionDetected(payload, false),
-      dust: normalizedDust || clone(this.state.latest.dust),
       sensors: readingSensorMetadata(payload, now),
       timestamp: now,
       source: String(source || 'api'),
@@ -555,28 +524,18 @@ class JsonStore {
       (payload.lightLevel !== undefined ||
         payload.light !== undefined ||
         payload.ldr !== undefined);
-    const hasDust = extractDustPayload(payload) !== null;
-    if (hasTemperatureAndLight || hasDust) {
-      const sensorValues = hasTemperatureAndLight
-        ? normalizeReading(payload)
-        : {
-          temperature: this.state.latest.temperature,
-          lightLevel: this.state.latest.lightLevel
-        };
+    if (hasTemperatureAndLight) {
+      const sensorValues = normalizeReading(payload);
       const timestamp = validTimestamp(
         payload.generatedAt || payload.timestamp,
         now
       );
-      const dust = hasDust
-        ? normalizeDustReading(payload, this.state.config, timestamp)
-        : clone(this.state.latest.dust);
       const reading = {
         ...sensorValues,
         motionDetected: normalizeMotionDetected(
           payload,
           this.state.latest.motionDetected
         ),
-        dust,
         sensors: readingSensorMetadata(payload, timestamp),
         timestamp,
         source,
@@ -681,14 +640,6 @@ class JsonStore {
   updateConfig(payload) {
     const now = this.now();
     this.state.config = normalizeConfigPatch(payload, this.state.config);
-    this.state.latest.dust = reclassifyDustReading(
-      this.state.latest.dust,
-      this.state.config.dustThresholds
-    );
-    this.state.history = this.state.history.map((item) => ({
-      ...item,
-      dust: reclassifyDustReading(item.dust, this.state.config.dustThresholds)
-    }));
     const before = this.state.lightStatus;
     applyAutomation(this.state);
     this.recordLightEventIfChanged(before, 'config', now);

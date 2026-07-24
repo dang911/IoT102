@@ -12,45 +12,12 @@
     "sensorOfflineTimeoutMs": 60000,
     "forecastWindowSize": 12,
     "forecastMinSamples": 4,
-    "forecastHorizonMinutes": 15,
-    "dustThresholds": {
-      "moderate": 50,
-      "high": 150,
-      "dangerous": 300
-    },
-    "dustCalibration": {
-      "cleanAirVoltage": 0.9,
-      "sensitivity": 0.005,
-      "calibrationFactor": 1,
-      "offsetUgM3": 0,
-      "calibrated": false,
-      "adcReferenceVoltage": 3.3,
-      "adcMax": 4095,
-      "voltageDividerRatio": 0.545455,
-      "maxSensorVoltage": 5.1
-    }
+    "forecastHorizonMinutes": 15
   },
   "latest": {
     "temperature": 28,
     "lightLevel": 420,
     "motionDetected": false,
-    "dust": {
-      "rawAdc": null,
-      "adcVoltage": null,
-      "voltage": null,
-      "density": null,
-      "unit": "ug/m3",
-      "level": "UNKNOWN",
-      "classification": "INTERNAL_PROJECT_THRESHOLDS_NOT_AQI",
-      "disclaimer": "Mật độ bụi ước tính – chỉ dùng cho mục đích học tập và theo dõi xu hướng.",
-      "sensorOnline": false,
-      "calibrated": false,
-      "lastUpdate": "2026-06-17T06:19:15.063Z",
-      "valid": false,
-      "abnormal": false,
-      "saturated": false,
-      "error": "NO_DATA"
-    },
     "sensors": {
       "temperature": {
         "online": true,
@@ -74,23 +41,6 @@
       "temperature": 28,
       "lightLevel": 420,
       "motionDetected": false,
-      "dust": {
-        "rawAdc": null,
-        "adcVoltage": null,
-        "voltage": null,
-        "density": null,
-        "unit": "ug/m3",
-        "level": "UNKNOWN",
-        "classification": "INTERNAL_PROJECT_THRESHOLDS_NOT_AQI",
-        "disclaimer": "Mật độ bụi ước tính – chỉ dùng cho mục đích học tập và theo dõi xu hướng.",
-        "sensorOnline": false,
-        "calibrated": false,
-        "lastUpdate": "2026-06-17T06:19:15.063Z",
-        "valid": false,
-        "abnormal": false,
-        "saturated": false,
-        "error": "NO_DATA"
-      },
       "sensors": {
         "temperature": {
           "online": true,
@@ -112,80 +62,49 @@
       "lightStatus": false
     }
   ],
-  "notifications": [
-    {
-      "id": "notification-000001",
-      "type": "DUST_SENSOR_OFFLINE",
-      "severity": "WARNING",
-      "title": "Cảm biến bụi mất dữ liệu",
-      "message": "Không nhận được dữ liệu hợp lệ mới từ cảm biến bụi.",
-      "value": null,
-      "threshold": 60000,
-      "timestamp": "2026-07-15T06:59:47.296Z",
-      "read": false,
-      "source": "backend"
-    },
-    {
-      "id": "notification-000002",
-      "type": "DUST_SENSOR_OFFLINE",
-      "severity": "WARNING",
-      "title": "Cảm biến bụi mất dữ liệu",
-      "message": "Không nhận được dữ liệu hợp lệ mới từ cảm biến bụi.",
-      "value": null,
-      "threshold": 60000,
-      "timestamp": "2026-07-16T03:17:43.534Z",
-      "read": false,
-      "source": "backend"
-    }
-  ],
+  "notifications": [],
   "alertStates": {
     "temperatureHigh": {
       "active": false,
       "stateToken": null,
       "lastNotificationAt": null,
-      "lastEvaluatedAt": "2026-07-16T03:17:52.151Z"
+      "lastEvaluatedAt": "2026-07-23T12:23:44.507Z"
     },
     "lowLight": {
       "active": false,
       "stateToken": null,
       "lastNotificationAt": null,
-      "lastEvaluatedAt": "2026-07-16T03:17:52.151Z"
-    },
-    "dustHigh": {
-      "active": false,
-      "stateToken": null,
-      "lastNotificationAt": null,
-      "lastEvaluatedAt": "2026-07-16T03:17:52.151Z"
-    },
-    "dustSensorOffline": {
-      "active": true,
-      "stateToken": "NO_DATA",
-      "lastNotificationAt": "2026-07-16T03:17:43.534Z",
-      "lastEvaluatedAt": "2026-07-16T03:17:52.151Z"
+      "lastEvaluatedAt": "2026-07-23T12:23:44.507Z"
     },
     "sensorAbnormal": {
       "active": false,
       "stateToken": null,
       "lastNotificationAt": null,
-      "lastEvaluatedAt": "2026-07-16T03:17:52.151Z"
+      "lastEvaluatedAt": "2026-07-23T12:23:44.507Z"
     },
     "esp32Offline": {
       "active": false,
       "stateToken": null,
       "lastNotificationAt": null,
-      "lastEvaluatedAt": "2026-07-16T03:17:52.151Z"
+      "lastEvaluatedAt": "2026-07-23T12:23:44.507Z"
     },
     "environmentDegraded": {
       "active": false,
       "stateToken": null,
       "lastNotificationAt": null,
-      "lastEvaluatedAt": "2026-07-16T03:17:52.151Z"
+      "lastEvaluatedAt": "2026-07-23T12:23:44.507Z"
+    },
+    "intruderDetected": {
+      "active": false,
+      "stateToken": null,
+      "lastNotificationAt": null,
+      "lastEvaluatedAt": "2026-07-23T12:23:44.507Z"
     }
   },
   "nextNotificationId": 3,
   "connection": {
-    "enabled": true,
-    "esp32Online": false,
+    "enabled": false,
+    "esp32Online": null,
     "lastSeen": null,
     "lastError": null
   },
@@ -197,8 +116,7 @@
   },
   "sensorConnectionStates": {
     "temperature": false,
-    "light": false,
-    "dust": false
+    "light": false
   },
   "disconnectEvents": [],
   "lightEvents": [

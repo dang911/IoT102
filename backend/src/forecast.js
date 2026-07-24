@@ -127,11 +127,6 @@ function buildForecast(history, config, now = new Date().toISOString()) {
     },
     windowSize
   );
-  const dustSeries = collectSeries(
-    history,
-    (item) => item.dust && item.dust.valid !== false ? item.dust.density : NaN,
-    windowSize
-  );
   const temperature = forecastMetric(temperatureSeries, {
     unit: '°C',
     horizonMinutes,
@@ -139,34 +134,21 @@ function buildForecast(history, config, now = new Date().toISOString()) {
     windowSize,
     stableRate: 0.02
   });
-  const dust = forecastMetric(dustSeries, {
-    unit: 'ug/m3',
-    horizonMinutes,
-    minimumSamples,
-    windowSize,
-    stableRate: 0.2,
-    clampMinimum: 0
-  });
-
-  let environmentTrend = 'STABLE';
-  if (temperature.insufficientData && dust.insufficientData) {
-    environmentTrend = 'INSUFFICIENT_DATA';
-  } else if (temperature.trend === 'INCREASING' || dust.trend === 'INCREASING') {
-    environmentTrend = 'DEGRADING';
-  } else if (
-    [temperature.trend, dust.trend].some((trend) => trend === 'DECREASING')
-  ) {
-    environmentTrend = 'IMPROVING';
-  }
+  const environmentTrend = temperature.insufficientData
+    ? 'INSUFFICIENT_DATA'
+    : temperature.trend === 'INCREASING'
+      ? 'DEGRADING'
+      : temperature.trend === 'DECREASING'
+        ? 'IMPROVING'
+        : 'STABLE';
 
   return {
     generatedAt: now,
     horizonMinutes,
-    sampleCount: Math.max(temperature.samplesUsed, dust.samplesUsed),
-    insufficientData: temperature.insufficientData && dust.insufficientData,
-    partialData: temperature.insufficientData !== dust.insufficientData,
+    sampleCount: temperature.samplesUsed,
+    insufficientData: temperature.insufficientData,
+    partialData: false,
     temperature,
-    dust,
     environmentTrend,
     disclaimer: FORECAST_DISCLAIMER
   };

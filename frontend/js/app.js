@@ -12,8 +12,7 @@
             payload.temperature !== undefined ||
             payload.lightLevel !== undefined ||
             payload.lightStatus !== undefined ||
-            payload.mode !== undefined ||
-            payload.dust !== undefined
+            payload.mode !== undefined
         ) return true;
         return [payload.data, payload.current, payload.result, payload.status]
             .some((candidate) => candidate && candidate !== payload && hasStatusFields(candidate));

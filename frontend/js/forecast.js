@@ -118,7 +118,6 @@
         if (!grid) return;
         grid.replaceChildren(
             createMetricCard('Temperature', root.temperature || {}, root),
-            createMetricCard('Dust density', root.dust || root.dustDensity || {}, root),
             createEnvironmentCard(root.environmentTrend || root.environment || 'STABLE', root)
         );
     }

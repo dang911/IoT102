@@ -74,18 +74,6 @@
         };
     }
 
-    function highestDustSummary(value) {
-        if (!value) return { value: 'Unavailable', detail: 'No high-dust period recorded' };
-        if (typeof value === 'string') return { value: value, detail: 'Highest estimated dust period' };
-        const density = first(value, ['density', 'value', 'maximum', 'max']);
-        const from = first(value, ['from', 'start', 'timestamp']);
-        const to = first(value, ['to', 'end']);
-        return {
-            value: density === null ? 'Recorded' : formatNumber(density, 'µg/m³'),
-            detail: to ? `${formatTime(from)} – ${formatTime(to)}` : formatTime(from)
-        };
-    }
-
     function createMetric(title, value, detail) {
         const card = document.createElement('div');
         card.className = 'report-metric';
@@ -125,15 +113,12 @@
         const statistics = report.statistics || report.stats || {};
         const temperature = statisticsSummary(statistics.temperature, '°C');
         const light = statisticsSummary(statistics.light || statistics.lightLevel, 'Lux');
-        const dust = statisticsSummary(statistics.dust || statistics.dustDensity, 'µg/m³');
         const exceedances = report.thresholdExceedances || report.exceedances || {};
         const notifications = report.notifications || {};
         const led = report.led || report.lightStatus || {};
         const system = report.system || {};
-        const highestDust = highestDustSummary(report.highestDustPeriod || report.peakDustPeriod);
         const sampleCount = number(report.sampleCount ?? statistics.sampleCount);
         const temperatureExceedances = number(exceedances.temperature ?? exceedances.temperatureHigh);
-        const dustExceedances = number(exceedances.dust ?? exceedances.dustHigh);
         const notificationTotal = number(notifications.total ?? report.totalNotifications);
         const unread = number(notifications.unread);
         const disconnects = number(system.disconnectCount ?? report.sensorDisconnects);
@@ -144,10 +129,7 @@
                 createMetric('Samples', sampleCount === null ? 'Unavailable' : String(Math.round(sampleCount)), `${formatTime(report.from)} – ${formatTime(report.to)}`),
                 createMetric('Average temperature', temperature.value, temperature.detail),
                 createMetric('Average light', light.value, light.detail),
-                createMetric('Average estimated dust', dust.value, dust.detail),
                 createMetric('Temperature exceedances', temperatureExceedances === null ? 'Unavailable' : String(Math.round(temperatureExceedances)), 'Configured high-temperature threshold'),
-                createMetric('Dust exceedances', dustExceedances === null ? 'Unavailable' : String(Math.round(dustExceedances)), 'Internal project dust thresholds'),
-                createMetric('Highest dust period', highestDust.value, highestDust.detail),
                 createMetric('Notifications', notificationTotal === null ? 'Unavailable' : String(Math.round(notificationTotal)), unread === null ? 'Unread count unavailable' : `${Math.round(unread)} unread`),
                 createMetric('LED on ratio', formatPercent(led.onRatio ?? report.ledOnRatio), `Off ${formatPercent(led.offRatio ?? report.ledOffRatio)}`),
                 createMetric('System uptime', formatDuration(system.uptimeMs ?? report.uptimeMs), 'Recorded during this report period'),

@@ -241,15 +241,9 @@
         const data = unwrapStatus(payload);
         const temperature = number(data.temperature ?? data.temp);
         const light = number(data.lightLevel ?? data.light ?? data.ldr);
-        const dust = data.dust || data.sensors?.dust || {};
-        const dustDensity = number(dust.density ?? data.dustDensity);
-        const dustLevel = String(dust.level || data.dustLevel || '').toUpperCase();
         const alerts = data.alerts || {};
         const temperatureHigh = booleanValue(alerts.temperatureHigh) === true;
         const lowLight = booleanValue(alerts.lowLight) === true;
-        const dustHigh = booleanValue(alerts.dustHigh) === true || ['HIGH', 'DANGEROUS'].includes(dustLevel);
-        const dustOffline = booleanValue(alerts.dustSensorOffline) === true || booleanValue(dust.sensorOnline) === false;
-        const dustInvalid = booleanValue(dust.valid) === false || Boolean(dust.error);
         const intruderDetected = booleanValue(
             alerts.intruderDetected ?? data.motionDetected ?? data.presenceDetected
         ) === true;
@@ -279,38 +273,6 @@
             message: light === null ? 'Ambient light is below the configured threshold.' : `Ambient light dropped to ${Math.round(light)} Lux.`,
             value: light,
             threshold: data.thresholds?.dark,
-            source: data.source || 'controller'
-        });
-        raiseCondition('dust-high', dustHigh, {
-            type: 'DUST_HIGH',
-            severity: dustLevel === 'DANGEROUS' ? 'critical' : 'danger',
-            title: dustLevel === 'DANGEROUS' ? 'Dangerous internal dust level' : 'High dust density detected',
-            message: dustDensity === null ? 'Estimated dust density exceeded an internal project threshold.' : `Estimated dust density reached ${dustDensity.toFixed(1)} µg/m³ (${dustLevel || 'HIGH'}).`,
-            value: dustDensity,
-            threshold: dust.threshold,
-            source: data.source || 'controller'
-        });
-        raiseCondition('dust-offline', dustOffline, {
-            type: 'SENSOR_OFFLINE',
-            severity: 'danger',
-            title: 'Dust sensor offline',
-            message: 'The GP2Y1014AU0F has stopped returning valid data. Check power and wiring.',
-            source: data.source || 'controller'
-        });
-        raiseCondition('dust-invalid', dustInvalid && !dustOffline, {
-            type: 'SENSOR_ABNORMAL',
-            severity: 'warning',
-            title: 'Abnormal dust sensor reading',
-            message: String(dust.error || 'The dust sensor returned an invalid or saturated ADC reading.'),
-            value: dust.rawAdc,
-            source: data.source || 'controller'
-        });
-        raiseCondition('environment-dangerous', dustLevel === 'DANGEROUS', {
-            type: 'ENVIRONMENT_DEGRADED',
-            severity: 'critical',
-            title: 'Environment changed to dangerous',
-            message: 'The project environment classification changed to DANGEROUS. Increase ventilation and inspect the room.',
-            value: dustDensity,
             source: data.source || 'controller'
         });
     }

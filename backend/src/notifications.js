@@ -2,10 +2,8 @@ function buildNotificationCandidates(status, config) {
   const abnormalSensors = Object.entries(status.sensors || {})
     .filter(([, sensor]) => sensor && sensor.abnormal)
     .map(([name]) => name);
-  if (status.dust && status.dust.abnormal && !abnormalSensors.includes('dust')) {
-    abnormalSensors.push('dust');
-  }
-  const candidates = [
+
+  return [
     {
       key: 'intruderDetected',
       active: Boolean(status.alerts.intruderDetected),
@@ -40,40 +38,16 @@ function buildNotificationCandidates(status, config) {
       source: status.source
     },
     {
-      key: 'dustHigh',
-      active: status.alerts.dustHigh,
-      stateToken: status.dust.level,
-      type: 'DUST_HIGH',
-      severity: status.dust.level === 'DANGEROUS' ? 'CRITICAL' : 'WARNING',
-      title: 'Mật độ bụi cao',
-      message: `Mật độ bụi ước tính ${status.dust.density} ug/m3 đang ở mức ${status.dust.level}.`,
-      value: status.dust.density,
-      threshold: config.dustThresholds.high,
-      source: status.source
-    },
-    {
-      key: 'dustSensorOffline',
-      active: status.alerts.dustSensorOffline,
-      stateToken: status.dust.error || 'OFFLINE',
-      type: 'DUST_SENSOR_OFFLINE',
-      severity: 'WARNING',
-      title: 'Cảm biến bụi mất dữ liệu',
-      message: 'Không nhận được dữ liệu hợp lệ mới từ cảm biến bụi.',
-      value: null,
-      threshold: config.sensorOfflineTimeoutMs,
-      source: 'backend'
-    },
-    {
       key: 'sensorAbnormal',
       active: Boolean(status.alerts.sensorAbnormal) || abnormalSensors.length > 0,
-      stateToken: abnormalSensors.join(',') || status.dust.error || 'INVALID_READING',
+      stateToken: abnormalSensors.join(',') || 'INVALID_READING',
       type: 'SENSOR_ABNORMAL',
       severity: 'WARNING',
       title: 'Dữ liệu cảm biến bất thường',
       message: abnormalSensors.length
         ? `Cảm biến báo dữ liệu bất thường: ${abnormalSensors.join(', ')}.`
-        : `Cảm biến báo dữ liệu bất thường: ${status.dust.error || 'INVALID_READING'}.`,
-      value: abnormalSensors.join(', ') || status.dust.rawAdc,
+        : 'Cảm biến báo dữ liệu bất thường.',
+      value: abnormalSensors.join(', ') || null,
       threshold: null,
       source: status.source
     },
@@ -93,20 +67,17 @@ function buildNotificationCandidates(status, config) {
     },
     {
       key: 'environmentDegraded',
-      active: ['POOR', 'DANGEROUS'].includes(status.status.environmentQuality),
+      active: status.status.environmentQuality === 'POOR',
       stateToken: status.status.environmentQuality,
       type: 'ENVIRONMENT_DEGRADED',
-      severity:
-        status.status.environmentQuality === 'DANGEROUS' ? 'CRITICAL' : 'WARNING',
+      severity: 'WARNING',
       title: 'Chất lượng môi trường suy giảm',
-      message: `Chất lượng môi trường chuyển sang mức ${status.status.environmentQuality}.`,
+      message: 'Nhiệt độ môi trường đang vượt ngưỡng cấu hình.',
       value: status.status.environmentQuality,
       threshold: 'POOR',
       source: status.source
     }
   ];
-
-  return candidates;
 }
 
 function createNotification(state, candidate, timestamp) {

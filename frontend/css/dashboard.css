@@ -325,10 +325,6 @@ main {
     flex-direction: column;
 }
 
-.dust-card {
-    border-color: color-mix(in srgb, var(--dust) 22%, var(--border));
-}
-
 .card-header {
     display: flex;
     align-items: center;
@@ -391,26 +387,6 @@ main {
 }
 
 .min-max strong {
-    color: var(--foreground);
-    font-size: 0.9rem;
-}
-
-.dust-details {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px 16px;
-    margin: 6px 0 16px;
-    color: var(--muted-foreground);
-    font-size: 0.78rem;
-}
-
-.dust-details > span {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-}
-
-.dust-details strong:not(.badge) {
     color: var(--foreground);
     font-size: 0.9rem;
 }
@@ -541,7 +517,6 @@ main {
 
 .temp-health { background: var(--chart-temperature); }
 .light-health { background: var(--chart-light); }
-.dust-health { background: var(--chart-dust); }
 
 .sensor-health-card > p {
     margin-top: 14px;

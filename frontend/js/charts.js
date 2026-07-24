@@ -25,14 +25,6 @@
             unit: 'Lux',
             color: '--chart-light',
             value: (item) => number(item.lightLevel ?? item.light ?? item.ldr)
-        },
-        {
-            canvasId: 'dust-chart',
-            statusId: 'dust-chart-status',
-            label: 'Estimated dust density',
-            unit: 'µg/m³',
-            color: '--chart-dust',
-            value: (item) => number(item.dust?.density ?? item.dustDensity)
         }
     ];
 
@@ -62,7 +54,7 @@
     }
 
     function sampleTimestamp(item) {
-        return item.timestamp || item.lastUpdate || item.createdAt || item.dust?.lastUpdate || null;
+        return item.timestamp || item.lastUpdate || item.createdAt || null;
     }
 
     function shortTime(value) {

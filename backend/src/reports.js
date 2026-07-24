@@ -1,8 +1,5 @@
 const { round, summarize } = require('./domain');
 
-const DUST_DISCLAIMER =
-  'Mật độ bụi ước tính – chỉ dùng cho mục đích học tập và theo dõi xu hướng.';
-
 function reportWindow(period, now) {
   const endMs = Date.parse(now);
   const durationMs = period === 'weekly'
@@ -42,20 +39,11 @@ function buildRecommendations(statistics, thresholds, disconnectCount) {
   ) {
     recommendations.push('Mở cửa hoặc tăng thông gió để giảm nhiệt độ trong phòng.');
   }
-  if (
-    statistics.dust.max !== null &&
-    statistics.dust.max >= thresholds.dustThresholds.high
-  ) {
-    recommendations.push('Kiểm tra, vệ sinh phòng và hạn chế hoạt động tạo nhiều bụi.');
-  }
-  if (statistics.dust.sampleCount === 0) {
-    recommendations.push('Kiểm tra nguồn, dây và vị trí đặt cảm biến bụi.');
-  }
   if (disconnectCount > 0) {
     recommendations.push('Kiểm tra nguồn và kết nối Wi-Fi của ESP32.');
   }
   if (recommendations.length === 0) {
-    recommendations.push('Tiếp tục theo dõi định kỳ và hiệu chuẩn cảm biến bằng thiết bị tham chiếu.');
+    recommendations.push('Tiếp tục theo dõi nhiệt độ và ánh sáng định kỳ.');
   }
   return recommendations;
 }
@@ -65,16 +53,8 @@ function buildAssessment(statistics, thresholds) {
     return 'Không đủ dữ liệu trong khoảng báo cáo.';
   }
   if (
-    statistics.dust.max !== null &&
-    statistics.dust.max >= thresholds.dustThresholds.dangerous
-  ) {
-    return 'Dữ liệu ghi nhận một khoảng có mật độ bụi ước tính rất cao.';
-  }
-  if (
-    (statistics.dust.max !== null &&
-      statistics.dust.max >= thresholds.dustThresholds.high) ||
-    (statistics.temperature.max !== null &&
-      statistics.temperature.max > thresholds.temperatureThreshold)
+    statistics.temperature.max !== null &&
+    statistics.temperature.max > thresholds.temperatureThreshold
   ) {
     return 'Điều kiện môi trường có thời điểm vượt ngưỡng cảnh báo nội bộ.';
   }
@@ -135,10 +115,6 @@ function buildReport(state, period, now = new Date().toISOString()) {
   const notifications = (state.notifications || []).filter((item) =>
     inWindow(item.timestamp, fromMs, toMs)
   );
-  const dustSamples = history.filter(
-    (item) => item.dust && item.dust.valid !== false &&
-      Number.isFinite(Number(item.dust.density))
-  );
   const temperatureHistory = history.filter((item) =>
     sensorReadingValid(item, 'temperature')
   );
@@ -150,20 +126,12 @@ function buildReport(state, period, now = new Date().toISOString()) {
     1
   );
   const light = publicSummary(lightHistory.map((item) => item.lightLevel), 0);
-  const dust = publicSummary(dustSamples.map((item) => item.dust.density), 1);
   const statistics = {
     sampleCount: history.length,
     temperature,
-    light,
-    dust
+    light
   };
 
-  const highestDust = dustSamples.reduce((highest, item) => {
-    if (!highest || Number(item.dust.density) > Number(highest.dust.density)) {
-      return item;
-    }
-    return highest;
-  }, null);
   const systemStartedAt = state.system && state.system.startedAt;
   const activeFromMs = Number.isFinite(Date.parse(systemStartedAt))
     ? Math.max(fromMs, Date.parse(systemStartedAt))
@@ -207,19 +175,8 @@ function buildReport(state, period, now = new Date().toISOString()) {
     thresholdExceedances: {
       temperature: temperatureHistory.filter(
         (item) => Number(item.temperature) > state.config.temperatureThreshold
-      ).length,
-      dust: dustSamples.filter(
-        (item) => Number(item.dust.density) >= state.config.dustThresholds.high
       ).length
     },
-    highestDustPeriod: highestDust
-      ? {
-        from: highestDust.timestamp,
-        to: highestDust.timestamp,
-        density: Number(highestDust.dust.density),
-        unit: 'ug/m3'
-      }
-      : null,
     notifications: {
       total: notifications.length,
       unread: notifications.filter((item) => !item.read).length
@@ -235,8 +192,7 @@ function buildReport(state, period, now = new Date().toISOString()) {
       esp32DisconnectCount
     },
     assessment: buildAssessment(statistics, state.config),
-    recommendations: buildRecommendations(statistics, state.config, disconnectCount),
-    disclaimer: DUST_DISCLAIMER
+    recommendations: buildRecommendations(statistics, state.config, disconnectCount)
   };
 }
 
@@ -262,11 +218,7 @@ function reportToCsv(report) {
     ['light', 'min', report.statistics.light.min, 'raw'],
     ['light', 'max', report.statistics.light.max, 'raw'],
     ['light', 'average', report.statistics.light.average, 'raw'],
-    ['dust', 'min', report.statistics.dust.min, 'ug/m3'],
-    ['dust', 'max', report.statistics.dust.max, 'ug/m3'],
-    ['dust', 'average', report.statistics.dust.average, 'ug/m3'],
     ['alerts', 'temperatureExceedances', report.thresholdExceedances.temperature, 'count'],
-    ['alerts', 'dustExceedances', report.thresholdExceedances.dust, 'count'],
     ['notifications', 'total', report.notifications.total, 'count'],
     ['led', 'onRatio', report.led.onRatio, 'ratio'],
     ['led', 'offRatio', report.led.offRatio, 'ratio'],
@@ -275,14 +227,12 @@ function reportToCsv(report) {
     ['system', 'sensorDisconnectCount', report.system.sensorDisconnectCount, 'count'],
     ['system', 'esp32DisconnectCount', report.system.esp32DisconnectCount, 'count'],
     ['report', 'assessment', report.assessment, ''],
-    ['report', 'recommendations', report.recommendations, ''],
-    ['report', 'disclaimer', report.disclaimer, '']
+    ['report', 'recommendations', report.recommendations, '']
   ];
   return `${rows.map((row) => row.map(escapeCsv).join(',')).join('\n')}\n`;
 }
 
 module.exports = {
-  DUST_DISCLAIMER,
   buildReport,
   calculateLedDurations,
   reportToCsv,
