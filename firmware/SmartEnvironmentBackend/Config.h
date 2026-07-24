@@ -33,7 +33,7 @@ constexpr float ADC_FULL_SCALE_VOLTAGE = 3.30f;
 // LM35 outputs 10 mV per degree Celsius. Compare the reading with a trusted
 // thermometer, then set this offset to: reference - ESP32 reading.
 // Example: ESP32 reads 32 C while reference is 30 C => offset = -2.0 C.
-constexpr float LM35_TEMPERATURE_OFFSET_C = -2.0f;
+constexpr float LM35_TEMPERATURE_OFFSET_C = -5.0f;
 
 constexpr float DEFAULT_TEMPERATURE_THRESHOLD_C = 35.0f;
 constexpr int DEFAULT_DARK_THRESHOLD = 200;
