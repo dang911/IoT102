@@ -1,8 +1,10 @@
 #include <Arduino.h>
+#include <WebServer.h>
 #include <WiFi.h>
 #include <Wire.h>
 
 #include "Config.h"
+#include "DashboardPage.h"
 #include "Lcd1602I2C.h"
 
 using namespace ProjectConfig;
@@ -10,10 +12,12 @@ using namespace ProjectConfig;
 namespace {
 
 Lcd1602I2C lcd;
+WebServer server(80);
 bool lcdOnline = false;
 float temperatureC = 0.0f;
 int lightLevel = 0;
 bool lightStatus = false;
+String operatingMode = "AUTO";
 uint32_t lastSensorReadMs = 0;
 uint32_t lastLcdRefreshMs = 0;
 
@@ -53,11 +57,92 @@ void readSensors(bool force = false) {
       LM35_TEMPERATURE_OFFSET_C;
   lightLevel = map(averageRawAdc(LDR_PIN), 0, ADC_MAX_RAW, 0, 1000);
 
-  if (lightLevel < DEFAULT_DARK_THRESHOLD) {
-    setLight(true);
-  } else if (lightLevel >= DEFAULT_BRIGHT_THRESHOLD) {
-    setLight(false);
+  if (operatingMode == "AUTO") {
+    if (lightLevel < DEFAULT_DARK_THRESHOLD) {
+      setLight(true);
+    } else if (lightLevel >= DEFAULT_BRIGHT_THRESHOLD) {
+      setLight(false);
+    }
   }
+}
+
+String statusJson() {
+  const bool temperatureHigh =
+      temperatureC > DEFAULT_TEMPERATURE_THRESHOLD_C;
+  const bool lowLight = lightLevel < DEFAULT_DARK_THRESHOLD;
+  String json;
+  json.reserve(600);
+  json += "{\"temperature\":" + String(temperatureC, 1);
+  json += ",\"lightLevel\":" + String(lightLevel);
+  json += ",\"lightStatus\":";
+  json += lightStatus ? "true" : "false";
+  json += ",\"mode\":\"" + operatingMode + "\"";
+  json += ",\"temperatureStatus\":\"";
+  json += temperatureHigh ? "HIGH" : "NORMAL";
+  json += "\",\"lightEnvironment\":\"";
+  json += lowLight ? "DARK" : "BRIGHT";
+  json += "\",\"dataSource\":\"REAL_SENSOR\"";
+  json += ",\"sensors\":{\"temperature\":{\"online\":true},";
+  json += "\"light\":{\"online\":true}},\"alerts\":{";
+  json += "\"temperatureHigh\":";
+  json += temperatureHigh ? "true" : "false";
+  json += ",\"lowLight\":";
+  json += lowLight ? "true" : "false";
+  json += "},\"timestamp\":" + String(millis()) + "}";
+  return json;
+}
+
+void sendJson(int code, const String& json) {
+  server.sendHeader("Access-Control-Allow-Origin", "*");
+  server.send(code, "application/json; charset=utf-8", json);
+}
+
+void sendStatus() {
+  readSensors(true);
+  sendJson(200, statusJson());
+}
+
+void setupWebServer() {
+  server.on("/", HTTP_GET, []() {
+    server.send_P(200, "text/html; charset=utf-8", DASHBOARD_HTML);
+  });
+  server.on("/index.html", HTTP_GET, []() {
+    server.send_P(200, "text/html; charset=utf-8", DASHBOARD_HTML);
+  });
+  server.on("/api/status", HTTP_GET, sendStatus);
+  server.on("/api/health", HTTP_GET, []() {
+    sendJson(200, "{\"ok\":true}");
+  });
+  server.on("/api/mode", HTTP_POST, []() {
+    const String body = server.arg("plain");
+    if (body.indexOf("AUTO") >= 0) {
+      operatingMode = "AUTO";
+    } else if (body.indexOf("MANUAL") >= 0) {
+      operatingMode = "MANUAL";
+    } else {
+      sendJson(400, "{\"error\":\"mode must be AUTO or MANUAL\"}");
+      return;
+    }
+    sendStatus();
+  });
+  server.on("/api/light", HTTP_POST, []() {
+    const String body = server.arg("plain");
+    operatingMode = "MANUAL";
+    if (body.indexOf("ON") >= 0) {
+      setLight(true);
+    } else if (body.indexOf("OFF") >= 0) {
+      setLight(false);
+    } else {
+      sendJson(400, "{\"error\":\"status must be ON or OFF\"}");
+      return;
+    }
+    sendStatus();
+  });
+  server.onNotFound([]() {
+    sendJson(404, "{\"error\":\"endpoint not found\"}");
+  });
+  server.begin();
+  Serial.println("Web server da khoi dong.");
 }
 
 void updateLcd(bool force = false) {
@@ -132,9 +217,11 @@ void setup() {
 
   readSensors(true);
   updateLcd(true);
+  setupWebServer();
 }
 
 void loop() {
+  server.handleClient();
   readSensors();
   updateLcd();
   printReadings();
