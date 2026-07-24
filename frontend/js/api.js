@@ -23,8 +23,8 @@
     if (queryApi) writeStorage('API_BASE_URL', queryApi);
 
     const configuredApi =
-        window.API_BASE_URL ||
         queryApi ||
+        window.API_BASE_URL ||
         readStorage('API_BASE_URL') ||
         '';
     const API_BASE_URL = String(configuredApi).replace(/\/+$/, '');

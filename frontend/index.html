@@ -6,6 +6,9 @@
     <meta name="color-scheme" content="light dark">
     <title>Smart Environment Monitoring &amp; Lighting Control</title>
     <script>
+        // ESP32 Access Point API. Override with ?api=http://other-device-ip
+        // when the dashboard needs to connect to another controller.
+        window.API_BASE_URL = 'http://192.168.4.1';
         try {
             if (localStorage.getItem('smarthome-theme') === 'dark') {
                 document.documentElement.classList.add('dark');

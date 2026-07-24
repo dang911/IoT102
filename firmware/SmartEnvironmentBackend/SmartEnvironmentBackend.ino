@@ -94,7 +94,16 @@ String statusJson() {
 
 void sendJson(int code, const String& json) {
   server.sendHeader("Access-Control-Allow-Origin", "*");
+  server.sendHeader("Access-Control-Allow-Headers", "Content-Type");
+  server.sendHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
   server.send(code, "application/json; charset=utf-8", json);
+}
+
+void sendOptions() {
+  server.sendHeader("Access-Control-Allow-Origin", "*");
+  server.sendHeader("Access-Control-Allow-Headers", "Content-Type");
+  server.sendHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  server.send(204, "text/plain", "");
 }
 
 void sendStatus() {
@@ -139,6 +148,10 @@ void setupWebServer() {
     sendStatus();
   });
   server.onNotFound([]() {
+    if (server.method() == HTTP_OPTIONS) {
+      sendOptions();
+      return;
+    }
     sendJson(404, "{\"error\":\"endpoint not found\"}");
   });
   server.begin();
