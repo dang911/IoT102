@@ -35,12 +35,6 @@
         setInput('config-temperature', first(config.temperatureThreshold, thresholds.temperature));
         setInput('config-dark', first(config.darkThreshold, thresholds.dark));
         setInput('config-bright', first(config.brightThreshold, thresholds.bright));
-        setInput('config-history-limit', config.historyLimit);
-        const cooldownMs = number(first(config.notificationCooldownMs, config.notifications?.cooldownMs));
-        setInput('config-cooldown', cooldownMs === null ? '' : cooldownMs / 1000);
-        if (window.notificationCenter && cooldownMs !== null) {
-            window.notificationCenter.setCooldown(cooldownMs);
-        }
     }
 
     function setFormEnabled(enabled) {
@@ -81,13 +75,7 @@
             throw new Error('Bright threshold must be greater than dark threshold.');
         }
 
-        const payload = { temperatureThreshold, darkThreshold, brightThreshold };
-        const historyLimit = readInput('config-history-limit');
-        if (historyLimit !== null) payload.historyLimit = Math.round(historyLimit);
-
-        const cooldownSeconds = readInput('config-cooldown');
-        if (cooldownSeconds !== null) payload.notificationCooldownMs = Math.round(cooldownSeconds * 1000);
-        return payload;
+        return { temperatureThreshold, darkThreshold, brightThreshold };
     }
 
     async function load() {
@@ -130,9 +118,6 @@
         setStatus('Saving configuration…');
         try {
             const response = await state.api.updateConfig(payload);
-            if (window.notificationCenter && payload.notificationCooldownMs !== undefined) {
-                window.notificationCenter.setCooldown(payload.notificationCooldownMs);
-            }
             document.dispatchEvent(new CustomEvent('dashboard:configsaved', { detail: response }));
             const refreshed = await state.api.getConfig();
             populate(refreshed);

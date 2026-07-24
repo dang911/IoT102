@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900">
+  <style>
+    text{font-family:Arial,sans-serif;fill:#172033}
+    .title{font-size:34px;font-weight:700}
+    .subtitle{font-size:18px;fill:#526070}
+    .box{fill:#fff;stroke:#26364a;stroke-width:3;rx:18}
+    .esp{fill:#eaf3ff;stroke:#1769aa;stroke-width:4;rx:22}
+    .label{font-size:23px;font-weight:700}
+    .pin{font-size:18px;font-weight:600}
+    .small{font-size:16px}
+    .wire{fill:none;stroke-width:5}
+    .power5{stroke:#e53935}.power33{stroke:#ef6c00}.ground{stroke:#263238}
+    .signal{stroke:#1565c0}.i2c{stroke:#7b1fa2}
+    .node{fill:#1565c0}
+    .note{fill:#fff8e1;stroke:#f9a825;stroke-width:2;rx:12}
+  </style>
+
+  <rect width="1400" height="900" fill="#f4f7fb"/>
+  <text x="700" y="55" text-anchor="middle" class="title">SƠ ĐỒ NỐI ESP32 — LM35, LDR, LED VÀ LCD1602 I2C</text>
+  <text x="700" y="88" text-anchor="middle" class="subtitle">Theo cấu hình firmware: GPIO34, GPIO35, GPIO2, SDA21 và SCL22</text>
+
+  <rect x="535" y="155" width="330" height="570" class="esp"/>
+  <text x="700" y="205" text-anchor="middle" class="label">ESP32 DEV MODULE</text>
+  <text x="565" y="265" class="pin">5V / VIN</text>
+  <text x="565" y="320" class="pin">3V3</text>
+  <text x="565" y="375" class="pin">GND</text>
+  <text x="565" y="455" class="pin">GPIO34 — LM35 OUT</text>
+  <text x="565" y="510" class="pin">GPIO35 — LDR ADC</text>
+  <text x="565" y="565" class="pin">GPIO2 — LED</text>
+  <text x="565" y="635" class="pin">GPIO21 — SDA</text>
+  <text x="565" y="680" class="pin">GPIO22 — SCL</text>
+
+  <!-- LM35 -->
+  <rect x="65" y="155" width="345" height="210" class="box"/>
+  <text x="237" y="195" text-anchor="middle" class="label">LM35</text>
+  <text x="237" y="224" text-anchor="middle" class="small">Nhìn vào mặt phẳng có chữ</text>
+  <text x="95" y="275" class="pin">1. VCC → 5V</text>
+  <text x="95" y="310" class="pin">2. OUT → GPIO34</text>
+  <text x="95" y="345" class="pin">3. GND → GND</text>
+  <path d="M410 270 H470 V265 H535" class="wire power5"/>
+  <path d="M410 305 H485 V455 H535" class="wire signal"/>
+  <path d="M410 340 H470 V375 H535" class="wire ground"/>
+
+  <!-- LDR divider -->
+  <rect x="65" y="420" width="345" height="305" class="box"/>
+  <text x="237" y="460" text-anchor="middle" class="label">LDR + CẦU PHÂN ÁP</text>
+  <text x="100" y="510" class="pin">3.3V</text>
+  <path d="M180 500 V540" class="wire power33"/>
+  <rect x="145" y="540" width="70" height="55" fill="#fff3e0" stroke="#ef6c00" stroke-width="3"/>
+  <text x="180" y="575" text-anchor="middle" class="pin">LDR</text>
+  <path d="M180 595 V630 H330" class="wire signal"/>
+  <circle cx="180" cy="630" r="8" class="node"/>
+  <text x="205" y="620" class="small">Điểm đo → GPIO35</text>
+  <path d="M180 630 V665" class="wire ground"/>
+  <rect x="145" y="665" width="70" height="45" fill="#eceff1" stroke="#263238" stroke-width="3"/>
+  <text x="180" y="694" text-anchor="middle" class="small">10 kΩ</text>
+  <path d="M330 630 H475 V510 H535" class="wire signal"/>
+  <path d="M410 500 H465 V320 H535" class="wire power33"/>
+  <path d="M180 710 V745 H470 V375 H535" class="wire ground"/>
+
+  <!-- LCD -->
+  <rect x="990" y="155" width="345" height="265" class="box"/>
+  <text x="1162" y="195" text-anchor="middle" class="label">LCD1602 I2C</text>
+  <text x="1020" y="250" class="pin">VCC → 5V</text>
+  <text x="1020" y="290" class="pin">GND → GND</text>
+  <text x="1020" y="330" class="pin">SDA → GPIO21</text>
+  <text x="1020" y="370" class="pin">SCL → GPIO22</text>
+  <path d="M990 245 H930 V265 H865" class="wire power5"/>
+  <path d="M990 285 H915 V375 H865" class="wire ground"/>
+  <path d="M990 325 H925 V635 H865" class="wire i2c"/>
+  <path d="M990 365 H945 V680 H865" class="wire i2c"/>
+
+  <!-- LED -->
+  <rect x="990" y="475" width="345" height="250" class="box"/>
+  <text x="1162" y="515" text-anchor="middle" class="label">LED CHIẾU SÁNG</text>
+  <text x="1020" y="565" class="pin">GPIO2 → điện trở 220 Ω</text>
+  <text x="1020" y="605" class="pin">→ chân dài LED (Anode +)</text>
+  <text x="1020" y="645" class="pin">Chân ngắn (Cathode −) → GND</text>
+  <path d="M990 560 H920 V565 H865" class="wire signal"/>
+  <path d="M990 640 H905 V375 H865" class="wire ground"/>
+
+  <rect x="65" y="790" width="1270" height="75" class="note"/>
+  <text x="700" y="820" text-anchor="middle" class="pin">Tất cả thiết bị phải dùng chung GND.</text>
+  <text x="700" y="848" text-anchor="middle" class="small">LCD backpack cấp 5V: kiểm tra điện áp kéo lên SDA/SCL; dùng bộ chuyển mức I2C nếu đường bus bị kéo lên 5V.</text>
+</svg>

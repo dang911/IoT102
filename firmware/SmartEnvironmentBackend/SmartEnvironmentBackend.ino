@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <Preferences.h>
 #include <WebServer.h>
 #include <WiFi.h>
 #include <Wire.h>
@@ -13,12 +14,16 @@ namespace {
 
 Lcd1602I2C lcd;
 WebServer server(80);
+Preferences preferences;
 bool lcdOnline = false;
 float temperatureC = 0.0f;
 int lightLevel = 0;
 bool lightStatus = false;
 bool buzzerStatus = false;
 String operatingMode = "AUTO";
+float temperatureThresholdC = DEFAULT_TEMPERATURE_THRESHOLD_C;
+int darkThreshold = DEFAULT_DARK_THRESHOLD;
+int brightThreshold = DEFAULT_BRIGHT_THRESHOLD;
 uint32_t lastSensorReadMs = 0;
 uint32_t lastLcdRefreshMs = 0;
 uint32_t lastBuzzerToggleMs = 0;
@@ -54,7 +59,7 @@ void setBuzzer(bool enabled) {
 void updateOverheatBuzzer() {
   const bool overheat =
       OVERHEAT_BUZZER_ENABLED &&
-      temperatureC >= DEFAULT_TEMPERATURE_THRESHOLD_C;
+      temperatureC >= temperatureThresholdC;
   if (!overheat) {
     setBuzzer(false);
     return;
@@ -83,9 +88,9 @@ void readSensors(bool force = false) {
   lightLevel = map(averageRawAdc(LDR_PIN), 0, ADC_MAX_RAW, 0, 1000);
 
   if (operatingMode == "AUTO") {
-    if (lightLevel < DEFAULT_DARK_THRESHOLD) {
+    if (lightLevel < darkThreshold) {
       setLight(true);
-    } else if (lightLevel >= DEFAULT_BRIGHT_THRESHOLD) {
+    } else if (lightLevel >= brightThreshold) {
       setLight(false);
     }
   }
@@ -93,8 +98,8 @@ void readSensors(bool force = false) {
 
 String statusJson() {
   const bool temperatureHigh =
-      temperatureC > DEFAULT_TEMPERATURE_THRESHOLD_C;
-  const bool lowLight = lightLevel < DEFAULT_DARK_THRESHOLD;
+      temperatureC > temperatureThresholdC;
+  const bool lowLight = lightLevel < darkThreshold;
   String json;
   json.reserve(600);
   json += "{\"temperature\":" + String(temperatureC, 1);
@@ -109,6 +114,10 @@ String statusJson() {
   json += "\",\"lightEnvironment\":\"";
   json += lowLight ? "DARK" : "BRIGHT";
   json += "\",\"dataSource\":\"REAL_SENSOR\"";
+  json += ",\"thresholds\":{\"temperature\":";
+  json += String(temperatureThresholdC, 1);
+  json += ",\"dark\":" + String(darkThreshold);
+  json += ",\"bright\":" + String(brightThreshold) + "}";
   json += ",\"sensors\":{\"temperature\":{\"online\":true},";
   json += "\"light\":{\"online\":true}},\"alerts\":{";
   json += "\"temperatureHigh\":";
@@ -122,15 +131,91 @@ String statusJson() {
 void sendJson(int code, const String& json) {
   server.sendHeader("Access-Control-Allow-Origin", "*");
   server.sendHeader("Access-Control-Allow-Headers", "Content-Type");
-  server.sendHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  server.sendHeader("Access-Control-Allow-Methods", "GET,POST,PATCH,OPTIONS");
   server.send(code, "application/json; charset=utf-8", json);
 }
 
 void sendOptions() {
   server.sendHeader("Access-Control-Allow-Origin", "*");
   server.sendHeader("Access-Control-Allow-Headers", "Content-Type");
-  server.sendHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  server.sendHeader("Access-Control-Allow-Methods", "GET,POST,PATCH,OPTIONS");
   server.send(204, "text/plain", "");
+}
+
+String configJson() {
+  String json = "{\"temperatureThreshold\":";
+  json += String(temperatureThresholdC, 1);
+  json += ",\"darkThreshold\":" + String(darkThreshold);
+  json += ",\"brightThreshold\":" + String(brightThreshold);
+  json += ",\"persistent\":true}";
+  return json;
+}
+
+bool readJsonNumber(const String& body, const char* key, float& value) {
+  const String token = String("\"") + key + "\"";
+  int start = body.indexOf(token);
+  if (start < 0) return false;
+  start = body.indexOf(':', start + token.length());
+  if (start < 0) return false;
+  ++start;
+  int end = body.indexOf(',', start);
+  const int objectEnd = body.indexOf('}', start);
+  if (end < 0 || (objectEnd >= 0 && objectEnd < end)) end = objectEnd;
+  if (end < 0) return false;
+  String numeric = body.substring(start, end);
+  numeric.trim();
+  if (numeric.length() == 0) return false;
+  value = numeric.toFloat();
+  return isfinite(value);
+}
+
+void loadRuntimeConfig() {
+  if (!preferences.begin("smartenv", true)) return;
+  temperatureThresholdC =
+      preferences.getFloat("tempHigh", DEFAULT_TEMPERATURE_THRESHOLD_C);
+  darkThreshold = preferences.getInt("dark", DEFAULT_DARK_THRESHOLD);
+  brightThreshold = preferences.getInt("bright", DEFAULT_BRIGHT_THRESHOLD);
+  preferences.end();
+}
+
+bool saveRuntimeConfig() {
+  if (!preferences.begin("smartenv", false)) return false;
+  bool ok = preferences.putFloat("tempHigh", temperatureThresholdC) > 0;
+  ok &= preferences.putInt("dark", darkThreshold) > 0;
+  ok &= preferences.putInt("bright", brightThreshold) > 0;
+  preferences.end();
+  return ok;
+}
+
+void handleConfigUpdate() {
+  const String body = server.arg("plain");
+  float requestedTemperature;
+  float requestedDark;
+  float requestedBright;
+  if (!readJsonNumber(body, "temperatureThreshold", requestedTemperature) ||
+      !readJsonNumber(body, "darkThreshold", requestedDark) ||
+      !readJsonNumber(body, "brightThreshold", requestedBright)) {
+    sendJson(400, "{\"error\":\"three numeric thresholds are required\"}");
+    return;
+  }
+
+  const int requestedDarkInt = static_cast<int>(roundf(requestedDark));
+  const int requestedBrightInt = static_cast<int>(roundf(requestedBright));
+  if (requestedTemperature < -20.0f || requestedTemperature > 100.0f ||
+      requestedDarkInt < 0 || requestedBrightInt > 1000 ||
+      requestedBrightInt <= requestedDarkInt) {
+    sendJson(400, "{\"error\":\"invalid threshold range\"}");
+    return;
+  }
+
+  temperatureThresholdC = requestedTemperature;
+  darkThreshold = requestedDarkInt;
+  brightThreshold = requestedBrightInt;
+  if (!saveRuntimeConfig()) {
+    sendJson(500, "{\"error\":\"could not save configuration\"}");
+    return;
+  }
+  sendJson(200, configJson());
 }
 
 void sendStatus() {
@@ -149,6 +234,10 @@ void setupWebServer() {
   server.on("/api/health", HTTP_GET, []() {
     sendJson(200, "{\"ok\":true}");
   });
+  server.on("/api/config", HTTP_GET, []() {
+    sendJson(200, configJson());
+  });
+  server.on("/api/config", HTTP_PATCH, handleConfigUpdate);
   server.on("/api/mode", HTTP_POST, []() {
     const String body = server.arg("plain");
     if (body.indexOf("AUTO") >= 0) {
@@ -223,6 +312,8 @@ void setup() {
   delay(100);
   Serial.println();
   Serial.println("Smart Environment ESP32 firmware starting");
+
+  loadRuntimeConfig();
 
   pinMode(LIGHT_LED_PIN, OUTPUT);
   pinMode(BUZZER_PIN, OUTPUT);

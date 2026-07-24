@@ -91,16 +91,9 @@
     }
 
     function initializeFeatureRefresh() {
-        window.historyCharts.load().then((available) => {
-            if (available) window.setInterval(() => window.historyCharts.load(), 15000);
-        });
         window.notificationCenter.load().then((available) => {
             if (available) window.setInterval(() => window.notificationCenter.load(), 10000);
         });
-        window.forecastPanel.load().then((available) => {
-            if (available) window.setInterval(() => window.forecastPanel.load(), 60000);
-        });
-        window.reportsPanel.load('daily');
         window.configPanel.load();
     }
 
@@ -108,10 +101,7 @@
         const required = [
             'api',
             'dashboard',
-            'historyCharts',
             'notificationCenter',
-            'forecastPanel',
-            'reportsPanel',
             'configPanel'
         ];
         const missing = required.filter((name) => !window[name]);
@@ -121,9 +111,6 @@
         }
 
         window.notificationCenter.init(window.api);
-        window.historyCharts.init(window.api);
-        window.forecastPanel.init(window.api);
-        window.reportsPanel.init(window.api);
         window.configPanel.init(window.api);
         window.dashboard.init({
             onMode: (mode) => applyCommand(() => window.api.setMode(mode)),
@@ -138,7 +125,6 @@
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) {
                 refreshStatus().catch(() => {});
-                window.historyCharts.load();
             } else {
                 schedulePoll(BACKGROUND_POLL_MS);
             }
@@ -155,8 +141,6 @@
 
         document.addEventListener('dashboard:configsaved', (event) => {
             if (hasStatusFields(event.detail)) processStatus(event.detail);
-            window.historyCharts.load();
-            window.forecastPanel.load();
         });
     });
 })(window, document);
