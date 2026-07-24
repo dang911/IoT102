@@ -36,8 +36,8 @@ constexpr float ADC_FULL_SCALE_VOLTAGE = 3.30f;
 constexpr float LM35_TEMPERATURE_OFFSET_C = -5.0f;
 
 constexpr float DEFAULT_TEMPERATURE_THRESHOLD_C = 35.0f;
-constexpr int DEFAULT_DARK_THRESHOLD = 200;
-constexpr int DEFAULT_BRIGHT_THRESHOLD = 260;
+constexpr int DEFAULT_DARK_THRESHOLD = 50;
+constexpr int DEFAULT_BRIGHT_THRESHOLD = 150;
 
 // Keep light changes responsive while leaving enough time for ADC averaging
 // and the synchronous HTTP server to run smoothly.
