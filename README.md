@@ -11,9 +11,9 @@ khiển đèn, LCD và còi; đồng thời cung cấp REST API cùng Web Dashbo
 - Phát hiện chuyển động bằng PIR HC-SR501.
 - Kích hoạt còi TMB12A05 khi phát hiện chuyển động hoặc quá nhiệt.
 - Hiển thị trạng thái trên LCD1602 I2C và Serial Monitor.
-- Lưu lịch sử nhiệt độ/ánh sáng, tạo thông báo, dự báo xu hướng và báo cáo.
-- Gửi email cảnh báo quá nhiệt qua SMTP tới địa chỉ cấu hình trên Dashboard.
-- Điều khiển chế độ và đèn bằng cử chỉ tay qua webcam laptop.
+- Lưu lịch sử nhiệt độ/ánh sáng, tạo thông báo.
+- Gửi email cảnh báo quá nhiệt.
+- Điều khiển chế độ và đèn bằng cử chỉ tay qua camera.
 
 ## Kiến trúc
 
@@ -105,3 +105,12 @@ trạng thái AUTO/MANUAL và ON/OFF trên giao diện trình duyệt.
 - `firmware/SmartEnvironmentBackend/`: firmware ESP32.
 - `firmware/PirMonitorTest/`: test riêng HC-SR501.
 - `firmware/PirBuzzerTest/`: test PIR kết hợp còi.
+
+## Thành viên nhóm 4
+
+| Họ Tên | MSSV |
+|---|---|
+| Mai Hoàng Đăng | QE190050 |
+| Đào Cao Duy | QE190089 |
+| Phạm Phương Thảo | QE200053 |
+| Nguyễn Châu Khánh Linh | QE180043 |
