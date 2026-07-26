@@ -108,9 +108,9 @@ trạng thái AUTO/MANUAL và ON/OFF trên giao diện trình duyệt.
 
 ## Thành viên nhóm 4
 
-| Tên | MSSV |
+| Họ Tên | MSSV |
 |---|---|
 | Mai Hoàng Đăng | QE190050 |
 | Đào Cao Duy | QE190089 |
-| Phạm Phương  | QE200053 |
+| Phạm Phương Thảo | QE200053 |
 | Nguyễn Châu Khánh Linh | QE180043 |
