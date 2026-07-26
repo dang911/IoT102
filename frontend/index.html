@@ -177,6 +177,36 @@
                     <p id="control-feedback" class="inline-feedback" role="status" aria-live="polite"></p>
                 </article>
 
+                <article class="card gesture-control-card">
+                    <div class="card-header">
+                        <div>
+                            <p class="card-kicker">Laptop webcam</p>
+                            <h2>Gesture control</h2>
+                        </div>
+                        <span id="gesture-badge" class="badge badge-neutral">OFF</span>
+                    </div>
+                    <div class="gesture-camera-wrap">
+                        <video id="gesture-video" muted playsinline aria-label="Webcam preview for hand gesture control"></video>
+                        <div id="gesture-camera-placeholder">Camera preview</div>
+                    </div>
+                    <div class="gesture-actions">
+                        <button id="gesture-start" class="primary-button" type="button">Start webcam</button>
+                        <button id="gesture-stop" class="secondary-button" type="button" disabled>Stop</button>
+                    </div>
+                    <label class="gesture-demo-toggle">
+                        <input id="gesture-demo-mode" type="checkbox">
+                        <span>Demo without API</span>
+                    </label>
+                    <div class="gesture-guide" aria-label="Gesture command guide">
+                        <span>☝️ <strong>AUTO</strong></span>
+                        <span>✌️ <strong>MANUAL</strong></span>
+                        <span>🖐️ <strong>Light ON</strong></span>
+                        <span>✊ <strong>Light OFF</strong></span>
+                    </div>
+                    <p id="gesture-result" class="inline-feedback" role="status" aria-live="polite">Webcam is off.</p>
+                    <p class="field-hint">Open palm and fist commands work only while MANUAL mode is active. Demo mode changes only the browser display.</p>
+                </article>
+
                 <article class="card sensor-health-card">
                     <div class="card-header">
                         <div>
@@ -363,5 +393,6 @@
     <script src="js/config.js"></script>
     <script src="js/dashboard.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/gestures.js"></script>
 </body>
 </html>

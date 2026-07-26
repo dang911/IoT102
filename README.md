@@ -13,6 +13,7 @@ khiển đèn, LCD và còi; đồng thời cung cấp REST API cùng Web Dashbo
 - Hiển thị trạng thái trên LCD1602 I2C và Serial Monitor.
 - Lưu lịch sử nhiệt độ/ánh sáng, tạo thông báo, dự báo xu hướng và báo cáo.
 - Gửi email cảnh báo quá nhiệt qua SMTP tới địa chỉ cấu hình trên Dashboard.
+- Điều khiển chế độ và đèn bằng cử chỉ tay qua webcam laptop.
 
 ## Kiến trúc
 
@@ -66,6 +67,20 @@ password: process.env.SMTP_PASSWORD || 'APP_PASSWORD_16_KY_TU',
 Chạy lại backend, vào **Settings → Email notifications**, nhập email người
 nhận rồi lưu. Email chỉ được gửi khi cảnh báo `TEMPERATURE_HIGH` mới được tạo;
 thời gian cooldown thông báo hiện tại cũng được áp dụng để tránh gửi thư rác.
+
+## Điều khiển bằng cử chỉ
+
+Mở Dashboard bằng `http://localhost:3000` trên laptop, bấm **Start webcam** và
+cho phép dùng camera. Giữ cử chỉ ổn định trước camera để gửi lệnh:
+
+- ☝️ `Pointing_Up`: AUTO mode.
+- ✌️ `Victory`: MANUAL mode.
+- 🖐️ `Open_Palm`: bật đèn khi đang MANUAL.
+- ✊ `Closed_Fist`: tắt đèn khi đang MANUAL.
+
+Mô hình MediaPipe được tải khi bật webcam nên laptop cần Internet trong lần tải.
+Nếu backend/ESP32 chưa kết nối, bật **Demo without API** để cử chỉ chỉ thay đổi
+trạng thái AUTO/MANUAL và ON/OFF trên giao diện trình duyệt.
 
 ## REST API chính
 
