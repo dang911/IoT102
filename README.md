@@ -19,8 +19,8 @@ khiển đèn, LCD và còi; đồng thời cung cấp REST API cùng Web Dashbo
 
 ```text
 LM35 ─┐
-LDR  ─┼── ESP32 ── LED / LCD1602 / TMB12A05
-PIR  ─┘      │
+      ┼── ESP32 ── LED / LCD1602 / TMB12A05
+LDR  ─┘      │
              └── Wi-Fi ── REST API ── Web Dashboard
 ```
 
@@ -30,7 +30,6 @@ PIR  ─┘      │
 |---|---|
 | GPIO34 | LM35 |
 | GPIO35 | LDR |
-| GPIO27 | HC-SR501 OUT |
 | GPIO26 | Điều khiển transistor của TMB12A05 |
 | GPIO2 | LED chiếu sáng |
 | GPIO21 / GPIO22 | LCD1602 I2C SDA / SCL |
