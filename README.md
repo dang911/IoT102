@@ -12,6 +12,7 @@ khiển đèn, LCD và còi; đồng thời cung cấp REST API cùng Web Dashbo
 - Kích hoạt còi TMB12A05 khi phát hiện chuyển động hoặc quá nhiệt.
 - Hiển thị trạng thái trên LCD1602 I2C và Serial Monitor.
 - Lưu lịch sử nhiệt độ/ánh sáng, tạo thông báo, dự báo xu hướng và báo cáo.
+- Gửi email cảnh báo quá nhiệt qua SMTP tới địa chỉ cấu hình trên Dashboard.
 
 ## Kiến trúc
 
@@ -51,6 +52,20 @@ Chạy kiểm thử:
 ```powershell
 node --test backend/tests/*.test.js
 ```
+
+## Email cảnh báo quá nhiệt
+
+Mở `backend/emailConfig.js` và điền tài khoản SMTP gửi email. Với Gmail, dùng
+App Password 16 ký tự thay cho mật khẩu đăng nhập thông thường:
+
+```js
+user: process.env.SMTP_USER || 'email-gui@gmail.com',
+password: process.env.SMTP_PASSWORD || 'APP_PASSWORD_16_KY_TU',
+```
+
+Chạy lại backend, vào **Settings → Email notifications**, nhập email người
+nhận rồi lưu. Email chỉ được gửi khi cảnh báo `TEMPERATURE_HIGH` mới được tạo;
+thời gian cooldown thông báo hiện tại cũng được áp dụng để tránh gửi thư rác.
 
 ## REST API chính
 

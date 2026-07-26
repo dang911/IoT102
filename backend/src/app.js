@@ -157,7 +157,8 @@ function serveStatic(response, frontendDir, pathname) {
 
   const extension = path.extname(filePath).toLowerCase();
   response.writeHead(200, {
-    'content-type': MIME_TYPES[extension] || 'application/octet-stream'
+    'content-type': MIME_TYPES[extension] || 'application/octet-stream',
+    'cache-control': 'no-cache'
   });
   fs.createReadStream(filePath).pipe(response);
 }
@@ -171,7 +172,8 @@ function createApp(options = {}) {
       dataFile:
         options.dataFile || path.join(rootDir, 'backend', 'data', 'state.json'),
       config: options.config || {},
-      clock: options.clock
+      clock: options.clock,
+      onNotification: options.onNotification
     });
   const gateway =
     options.gateway ||
@@ -338,10 +340,10 @@ function createApp(options = {}) {
 
       if (url.pathname === '/api/config' && request.method === 'GET') {
         const config = store.snapshot().config;
-        const hardware = gateway.enabled
-          ? await safeHardware(() => gateway.readConfig(), hardwareCallbacks)
-          : null;
-        sendJson(response, 200, withHardware(config, hardware));
+        // Runtime and email settings belong to the backend. Do not block this
+        // form while waiting for an unavailable ESP32; hardware synchronization
+        // is attempted when the user saves the controller thresholds.
+        sendJson(response, 200, config);
         return;
       }
 

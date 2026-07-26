@@ -9,30 +9,31 @@
     "historyLimit": 240,
     "notificationLimit": 500,
     "notificationCooldownMs": 300000,
+    "alertEmail": "thao205206@gmail.com",
     "sensorOfflineTimeoutMs": 60000,
     "forecastWindowSize": 12,
     "forecastMinSamples": 4,
     "forecastHorizonMinutes": 15
   },
   "latest": {
-    "temperature": 28,
-    "lightLevel": 420,
+    "temperature": 50,
+    "lightLevel": 500,
     "motionDetected": false,
     "sensors": {
       "temperature": {
         "online": true,
         "abnormal": false,
-        "lastUpdate": "2026-06-17T06:19:15.063Z",
+        "lastUpdate": "2026-07-26T08:38:58.470Z",
         "error": null
       },
       "light": {
         "online": true,
         "abnormal": false,
-        "lastUpdate": "2026-06-17T06:19:15.063Z",
+        "lastUpdate": "2026-07-26T08:38:58.470Z",
         "error": null
       }
     },
-    "timestamp": "2026-06-17T06:19:15.063Z",
+    "timestamp": "2026-07-26T08:38:58.470Z",
     "source": "api",
     "dataMode": "REAL"
   },
@@ -60,48 +61,409 @@
       "dataMode": "REAL",
       "mode": "AUTO",
       "lightStatus": false
+    },
+    {
+      "temperature": 25,
+      "lightLevel": 500,
+      "motionDetected": false,
+      "sensors": {
+        "temperature": {
+          "online": true,
+          "abnormal": false,
+          "lastUpdate": "2026-07-26T08:29:54.802Z",
+          "error": null
+        },
+        "light": {
+          "online": true,
+          "abnormal": false,
+          "lastUpdate": "2026-07-26T08:29:54.802Z",
+          "error": null
+        }
+      },
+      "timestamp": "2026-07-26T08:29:54.802Z",
+      "source": "api",
+      "dataMode": "REAL",
+      "mode": "AUTO",
+      "lightStatus": false
+    },
+    {
+      "temperature": 50,
+      "lightLevel": 500,
+      "motionDetected": false,
+      "sensors": {
+        "temperature": {
+          "online": true,
+          "abnormal": false,
+          "lastUpdate": "2026-07-26T08:29:54.845Z",
+          "error": null
+        },
+        "light": {
+          "online": true,
+          "abnormal": false,
+          "lastUpdate": "2026-07-26T08:29:54.845Z",
+          "error": null
+        }
+      },
+      "timestamp": "2026-07-26T08:29:54.845Z",
+      "source": "api",
+      "dataMode": "REAL",
+      "mode": "AUTO",
+      "lightStatus": false
+    },
+    {
+      "temperature": 25,
+      "lightLevel": 500,
+      "motionDetected": false,
+      "sensors": {
+        "temperature": {
+          "online": true,
+          "abnormal": false,
+          "lastUpdate": "2026-07-26T08:33:02.327Z",
+          "error": null
+        },
+        "light": {
+          "online": true,
+          "abnormal": false,
+          "lastUpdate": "2026-07-26T08:33:02.327Z",
+          "error": null
+        }
+      },
+      "timestamp": "2026-07-26T08:33:02.327Z",
+      "source": "api",
+      "dataMode": "REAL",
+      "mode": "AUTO",
+      "lightStatus": false
+    },
+    {
+      "temperature": 50,
+      "lightLevel": 500,
+      "motionDetected": false,
+      "sensors": {
+        "temperature": {
+          "online": true,
+          "abnormal": false,
+          "lastUpdate": "2026-07-26T08:33:02.344Z",
+          "error": null
+        },
+        "light": {
+          "online": true,
+          "abnormal": false,
+          "lastUpdate": "2026-07-26T08:33:02.344Z",
+          "error": null
+        }
+      },
+      "timestamp": "2026-07-26T08:33:02.344Z",
+      "source": "api",
+      "dataMode": "REAL",
+      "mode": "AUTO",
+      "lightStatus": false
+    },
+    {
+      "temperature": 25,
+      "lightLevel": 500,
+      "motionDetected": false,
+      "sensors": {
+        "temperature": {
+          "online": true,
+          "abnormal": false,
+          "lastUpdate": "2026-07-26T08:34:43.887Z",
+          "error": null
+        },
+        "light": {
+          "online": true,
+          "abnormal": false,
+          "lastUpdate": "2026-07-26T08:34:43.887Z",
+          "error": null
+        }
+      },
+      "timestamp": "2026-07-26T08:34:43.887Z",
+      "source": "api",
+      "dataMode": "REAL",
+      "mode": "AUTO",
+      "lightStatus": false
+    },
+    {
+      "temperature": 50,
+      "lightLevel": 500,
+      "motionDetected": false,
+      "sensors": {
+        "temperature": {
+          "online": true,
+          "abnormal": false,
+          "lastUpdate": "2026-07-26T08:34:43.896Z",
+          "error": null
+        },
+        "light": {
+          "online": true,
+          "abnormal": false,
+          "lastUpdate": "2026-07-26T08:34:43.896Z",
+          "error": null
+        }
+      },
+      "timestamp": "2026-07-26T08:34:43.896Z",
+      "source": "api",
+      "dataMode": "REAL",
+      "mode": "AUTO",
+      "lightStatus": false
+    },
+    {
+      "temperature": 25,
+      "lightLevel": 500,
+      "motionDetected": false,
+      "sensors": {
+        "temperature": {
+          "online": true,
+          "abnormal": false,
+          "lastUpdate": "2026-07-26T08:37:27.165Z",
+          "error": null
+        },
+        "light": {
+          "online": true,
+          "abnormal": false,
+          "lastUpdate": "2026-07-26T08:37:27.165Z",
+          "error": null
+        }
+      },
+      "timestamp": "2026-07-26T08:37:27.165Z",
+      "source": "api",
+      "dataMode": "REAL",
+      "mode": "AUTO",
+      "lightStatus": false
+    },
+    {
+      "temperature": 50,
+      "lightLevel": 500,
+      "motionDetected": false,
+      "sensors": {
+        "temperature": {
+          "online": true,
+          "abnormal": false,
+          "lastUpdate": "2026-07-26T08:37:27.194Z",
+          "error": null
+        },
+        "light": {
+          "online": true,
+          "abnormal": false,
+          "lastUpdate": "2026-07-26T08:37:27.194Z",
+          "error": null
+        }
+      },
+      "timestamp": "2026-07-26T08:37:27.194Z",
+      "source": "api",
+      "dataMode": "REAL",
+      "mode": "AUTO",
+      "lightStatus": false
+    },
+    {
+      "temperature": 25,
+      "lightLevel": 500,
+      "motionDetected": false,
+      "sensors": {
+        "temperature": {
+          "online": true,
+          "abnormal": false,
+          "lastUpdate": "2026-07-26T08:38:58.462Z",
+          "error": null
+        },
+        "light": {
+          "online": true,
+          "abnormal": false,
+          "lastUpdate": "2026-07-26T08:38:58.462Z",
+          "error": null
+        }
+      },
+      "timestamp": "2026-07-26T08:38:58.462Z",
+      "source": "api",
+      "dataMode": "REAL",
+      "mode": "AUTO",
+      "lightStatus": false
+    },
+    {
+      "temperature": 50,
+      "lightLevel": 500,
+      "motionDetected": false,
+      "sensors": {
+        "temperature": {
+          "online": true,
+          "abnormal": false,
+          "lastUpdate": "2026-07-26T08:38:58.470Z",
+          "error": null
+        },
+        "light": {
+          "online": true,
+          "abnormal": false,
+          "lastUpdate": "2026-07-26T08:38:58.470Z",
+          "error": null
+        }
+      },
+      "timestamp": "2026-07-26T08:38:58.470Z",
+      "source": "api",
+      "dataMode": "REAL",
+      "mode": "AUTO",
+      "lightStatus": false
     }
   ],
-  "notifications": [],
+  "notifications": [
+    {
+      "id": "notification-000003",
+      "type": "TEMPERATURE_HIGH",
+      "severity": "WARNING",
+      "title": "Nhiệt độ cao",
+      "message": "Nhiệt độ 50 °C đã vượt ngưỡng cấu hình.",
+      "value": 50,
+      "threshold": 35,
+      "timestamp": "2026-07-26T08:29:54.845Z",
+      "read": false,
+      "source": "api"
+    },
+    {
+      "id": "notification-000004",
+      "type": "ENVIRONMENT_DEGRADED",
+      "severity": "WARNING",
+      "title": "Chất lượng môi trường suy giảm",
+      "message": "Nhiệt độ môi trường đang vượt ngưỡng cấu hình.",
+      "value": "POOR",
+      "threshold": "POOR",
+      "timestamp": "2026-07-26T08:29:54.845Z",
+      "read": false,
+      "source": "api"
+    },
+    {
+      "id": "notification-000005",
+      "type": "TEMPERATURE_HIGH",
+      "severity": "WARNING",
+      "title": "Nhiệt độ cao",
+      "message": "Nhiệt độ 50 °C đã vượt ngưỡng cấu hình.",
+      "value": 50,
+      "threshold": 35,
+      "timestamp": "2026-07-26T08:33:02.344Z",
+      "read": false,
+      "source": "api"
+    },
+    {
+      "id": "notification-000006",
+      "type": "ENVIRONMENT_DEGRADED",
+      "severity": "WARNING",
+      "title": "Chất lượng môi trường suy giảm",
+      "message": "Nhiệt độ môi trường đang vượt ngưỡng cấu hình.",
+      "value": "POOR",
+      "threshold": "POOR",
+      "timestamp": "2026-07-26T08:33:02.344Z",
+      "read": false,
+      "source": "api"
+    },
+    {
+      "id": "notification-000007",
+      "type": "TEMPERATURE_HIGH",
+      "severity": "WARNING",
+      "title": "Nhiệt độ cao",
+      "message": "Nhiệt độ 50 °C đã vượt ngưỡng cấu hình.",
+      "value": 50,
+      "threshold": 35,
+      "timestamp": "2026-07-26T08:34:43.896Z",
+      "read": false,
+      "source": "api"
+    },
+    {
+      "id": "notification-000008",
+      "type": "ENVIRONMENT_DEGRADED",
+      "severity": "WARNING",
+      "title": "Chất lượng môi trường suy giảm",
+      "message": "Nhiệt độ môi trường đang vượt ngưỡng cấu hình.",
+      "value": "POOR",
+      "threshold": "POOR",
+      "timestamp": "2026-07-26T08:34:43.896Z",
+      "read": false,
+      "source": "api"
+    },
+    {
+      "id": "notification-000009",
+      "type": "TEMPERATURE_HIGH",
+      "severity": "WARNING",
+      "title": "Nhiệt độ cao",
+      "message": "Nhiệt độ 50 °C đã vượt ngưỡng cấu hình.",
+      "value": 50,
+      "threshold": 35,
+      "timestamp": "2026-07-26T08:37:27.194Z",
+      "read": false,
+      "source": "api"
+    },
+    {
+      "id": "notification-000010",
+      "type": "ENVIRONMENT_DEGRADED",
+      "severity": "WARNING",
+      "title": "Chất lượng môi trường suy giảm",
+      "message": "Nhiệt độ môi trường đang vượt ngưỡng cấu hình.",
+      "value": "POOR",
+      "threshold": "POOR",
+      "timestamp": "2026-07-26T08:37:27.194Z",
+      "read": false,
+      "source": "api"
+    },
+    {
+      "id": "notification-000011",
+      "type": "TEMPERATURE_HIGH",
+      "severity": "WARNING",
+      "title": "Nhiệt độ cao",
+      "message": "Nhiệt độ 50 °C đã vượt ngưỡng cấu hình.",
+      "value": 50,
+      "threshold": 35,
+      "timestamp": "2026-07-26T08:38:58.470Z",
+      "read": false,
+      "source": "api"
+    },
+    {
+      "id": "notification-000012",
+      "type": "ENVIRONMENT_DEGRADED",
+      "severity": "WARNING",
+      "title": "Chất lượng môi trường suy giảm",
+      "message": "Nhiệt độ môi trường đang vượt ngưỡng cấu hình.",
+      "value": "POOR",
+      "threshold": "POOR",
+      "timestamp": "2026-07-26T08:38:58.470Z",
+      "read": false,
+      "source": "api"
+    }
+  ],
   "alertStates": {
     "temperatureHigh": {
-      "active": false,
-      "stateToken": null,
-      "lastNotificationAt": null,
-      "lastEvaluatedAt": "2026-07-23T12:23:44.507Z"
+      "active": true,
+      "stateToken": true,
+      "lastNotificationAt": "2026-07-26T08:38:58.470Z",
+      "lastEvaluatedAt": "2026-07-26T08:38:58.470Z"
     },
     "lowLight": {
       "active": false,
       "stateToken": null,
       "lastNotificationAt": null,
-      "lastEvaluatedAt": "2026-07-23T12:23:44.507Z"
+      "lastEvaluatedAt": "2026-07-26T08:38:58.470Z"
     },
     "sensorAbnormal": {
       "active": false,
       "stateToken": null,
       "lastNotificationAt": null,
-      "lastEvaluatedAt": "2026-07-23T12:23:44.507Z"
+      "lastEvaluatedAt": "2026-07-26T08:38:58.470Z"
     },
     "esp32Offline": {
       "active": false,
       "stateToken": null,
       "lastNotificationAt": null,
-      "lastEvaluatedAt": "2026-07-23T12:23:44.507Z"
+      "lastEvaluatedAt": "2026-07-26T08:38:58.470Z"
     },
     "environmentDegraded": {
-      "active": false,
-      "stateToken": null,
-      "lastNotificationAt": null,
-      "lastEvaluatedAt": "2026-07-23T12:23:44.507Z"
+      "active": true,
+      "stateToken": "POOR",
+      "lastNotificationAt": "2026-07-26T08:38:58.470Z",
+      "lastEvaluatedAt": "2026-07-26T08:38:58.470Z"
     },
     "intruderDetected": {
       "active": false,
       "stateToken": null,
       "lastNotificationAt": null,
-      "lastEvaluatedAt": "2026-07-23T12:23:44.507Z"
+      "lastEvaluatedAt": "2026-07-26T08:38:58.470Z"
     }
   },
-  "nextNotificationId": 3,
+  "nextNotificationId": 13,
   "connection": {
     "enabled": false,
     "esp32Online": null,
@@ -110,15 +472,36 @@
   },
   "system": {
     "startedAt": "2026-07-15T06:47:59.399Z",
-    "disconnectCount": 0,
-    "sensorDisconnectCount": 0,
+    "disconnectCount": 4,
+    "sensorDisconnectCount": 4,
     "esp32DisconnectCount": 0
   },
   "sensorConnectionStates": {
-    "temperature": false,
-    "light": false
+    "temperature": true,
+    "light": true
   },
-  "disconnectEvents": [],
+  "disconnectEvents": [
+    {
+      "timestamp": "2026-07-26T08:34:19.202Z",
+      "source": "sensor",
+      "sensor": "temperature"
+    },
+    {
+      "timestamp": "2026-07-26T08:34:19.202Z",
+      "source": "sensor",
+      "sensor": "light"
+    },
+    {
+      "timestamp": "2026-07-26T08:36:23.959Z",
+      "source": "sensor",
+      "sensor": "temperature"
+    },
+    {
+      "timestamp": "2026-07-26T08:36:23.959Z",
+      "source": "sensor",
+      "sensor": "light"
+    }
+  ],
   "lightEvents": [
     {
       "timestamp": "2026-07-15T06:47:59.399Z",

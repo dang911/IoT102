@@ -2,6 +2,8 @@ const path = require('node:path');
 
 const { createApp } = require('./src/app');
 const { DEFAULT_CONFIG } = require('./src/domain');
+const { EmailNotifier } = require('./src/emailNotifier');
+const emailConfig = require('./emailConfig');
 
 function envNumber(name, fallback) {
   const value = Number(process.env[name]);
@@ -20,12 +22,15 @@ const rootDir = path.resolve(__dirname, '..');
 const port = envNumber('PORT', 3000);
 const host = process.env.HOST || '0.0.0.0';
 const esp32BaseUrl = process.env.ESP32_BASE_URL || '';
+const emailNotifier = new EmailNotifier(emailConfig);
 const app = createApp({
   rootDir,
   dataFile: process.env.DATA_FILE || path.join(rootDir, 'backend', 'data', 'state.json'),
   esp32BaseUrl,
   esp32TimeoutMs: envNumber('ESP32_TIMEOUT_MS', 2500),
   syncFromEsp32: envBoolean('SYNC_FROM_ESP32', Boolean(esp32BaseUrl)),
+  onNotification: (notification, config) =>
+    emailNotifier.sendOverheat(notification, config.alertEmail),
   config: {
     temperatureThreshold: envNumber(
       'TEMPERATURE_THRESHOLD',
@@ -42,6 +47,7 @@ const app = createApp({
       'NOTIFICATION_COOLDOWN_MS',
       DEFAULT_CONFIG.notificationCooldownMs
     ),
+    alertEmail: process.env.ALERT_EMAIL_TO || DEFAULT_CONFIG.alertEmail,
     sensorOfflineTimeoutMs: envNumber(
       'SENSOR_OFFLINE_TIMEOUT_MS',
       DEFAULT_CONFIG.sensorOfflineTimeoutMs
@@ -63,4 +69,7 @@ const app = createApp({
 
 app.listen(port, host, () => {
   console.log(`Smart Environment backend running at http://localhost:${port}`);
+  console.log(emailNotifier.enabled
+    ? 'SMTP email alerts are enabled.'
+    : 'SMTP email alerts are disabled; configure backend/emailConfig.js.');
 });

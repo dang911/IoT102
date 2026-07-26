@@ -48,11 +48,10 @@ constexpr uint32_t SERIAL_MONITOR_INTERVAL_MS = 1000;
 constexpr uint32_t WIFI_CONNECT_TIMEOUT_MS = 15000;
 constexpr uint32_t WIFI_RETRY_INTERVAL_MS = 10000;
 
-// Replace these two values for deployment. If they remain placeholders, the
-// firmware starts a local fallback AP so the dashboard is still reachable.
+// Replace these two values with the Wi-Fi router credentials before upload.
+// The ESP32 runs in station (STA) mode and does not create its own access point.
 constexpr const char* WIFI_SSID = "YOUR_WIFI_NAME";
 constexpr const char* WIFI_PASSWORD = "YOUR_WIFI_PASSWORD";
-constexpr const char* FALLBACK_AP_SSID = "SmartEnvironment-Setup";
 
 constexpr const char* NTP_SERVER_1 = "pool.ntp.org";
 constexpr const char* NTP_SERVER_2 = "time.nist.gov";

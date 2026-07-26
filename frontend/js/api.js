@@ -206,7 +206,7 @@
     }
 
     function getConfig() {
-        return request('/api/config', { timeoutMs: 5000 });
+        return request('/api/config', { timeoutMs: 10000 });
     }
 
     function updateConfig(config) {

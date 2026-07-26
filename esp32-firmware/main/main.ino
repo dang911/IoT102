@@ -36,8 +36,9 @@ void setup() {
   // ===== WiFi Manager Setup =====
   WiFiManager wifiManager;
 
-  // Reset WiFi settings (uncomment để reset, sau đó comment lại)
-  wifiManager.resetSettings();
+  // Không xóa cấu hình ở mỗi lần khởi động: sau lần thiết lập đầu tiên,
+  // ESP32 sẽ dùng STA để tự kết nối lại Wi-Fi đã lưu.
+  // Chỉ gọi wifiManager.resetSettings() thủ công khi cần đổi mạng.
 
   // Auto connect với SSID & password đã lưu, hoặc mở portal
   if (!wifiManager.autoConnect("SmartHome-Setup")) {

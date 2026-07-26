@@ -35,18 +35,20 @@
         setInput('config-temperature', first(config.temperatureThreshold, thresholds.temperature));
         setInput('config-dark', first(config.darkThreshold, thresholds.dark));
         setInput('config-bright', first(config.brightThreshold, thresholds.bright));
+        setInput('config-alert-email', config.alertEmail);
     }
 
-    function setFormEnabled(enabled) {
+    function setFormEnabled() {
         const form = byId('config-form');
         if (!form) return;
+        const busy = state.loading || state.saving;
         form.querySelectorAll('input').forEach((input) => {
-            input.disabled = !enabled || state.loading || state.saving;
+            input.disabled = busy;
         });
         const submit = byId('config-submit');
-        if (submit) submit.disabled = !enabled || state.loading || state.saving;
+        if (submit) submit.disabled = busy;
         const refresh = byId('config-refresh');
-        if (refresh) refresh.disabled = state.loading || state.saving;
+        if (refresh) refresh.disabled = busy;
     }
 
     function setStatus(message, type = '') {
@@ -75,7 +77,13 @@
             throw new Error('Bright threshold must be greater than dark threshold.');
         }
 
-        return { temperatureThreshold, darkThreshold, brightThreshold };
+        const alertEmailInput = byId('config-alert-email');
+        const alertEmail = alertEmailInput ? alertEmailInput.value.trim() : '';
+        if (alertEmailInput && alertEmail && !alertEmailInput.validity.valid) {
+            throw new Error('Email nhận cảnh báo không hợp lệ.');
+        }
+
+        return { temperatureThreshold, darkThreshold, brightThreshold, alertEmail };
     }
 
     async function load() {
@@ -104,7 +112,7 @@
 
     async function save(event) {
         event.preventDefault();
-        if (!state.available || state.saving) return;
+        if (state.saving) return;
         let payload;
         try {
             payload = buildPayload();

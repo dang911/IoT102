@@ -27,6 +27,67 @@ int brightThreshold = DEFAULT_BRIGHT_THRESHOLD;
 uint32_t lastSensorReadMs = 0;
 uint32_t lastLcdRefreshMs = 0;
 uint32_t lastBuzzerToggleMs = 0;
+uint32_t lastWifiRetryMs = 0;
+
+bool wifiCredentialsConfigured() {
+  return String(WIFI_SSID) != "YOUR_WIFI_NAME" &&
+         String(WIFI_SSID).length() > 0;
+}
+
+void printWifiAddress() {
+  Serial.print("WiFi da ket noi: ");
+  Serial.println(WiFi.SSID());
+  Serial.print("Dia chi IP: http://");
+  Serial.println(WiFi.localIP());
+}
+
+void connectWifi() {
+  WiFi.mode(WIFI_STA);
+  WiFi.setAutoReconnect(true);
+  WiFi.persistent(false);
+
+  if (!wifiCredentialsConfigured()) {
+    Serial.println("Chua cau hinh WIFI_SSID trong Config.h.");
+    return;
+  }
+
+  Serial.print("Dang ket noi WiFi ");
+  Serial.println(WIFI_SSID);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  const uint32_t startedAt = millis();
+  while (WiFi.status() != WL_CONNECTED &&
+         static_cast<uint32_t>(millis() - startedAt) < WIFI_CONNECT_TIMEOUT_MS) {
+    delay(250);
+    Serial.print('.');
+  }
+  Serial.println();
+
+  if (WiFi.status() == WL_CONNECTED) {
+    printWifiAddress();
+  } else {
+    Serial.println("Chua ket noi duoc WiFi; se tu dong thu lai.");
+  }
+}
+
+void maintainWifi() {
+  static bool previouslyConnected = false;
+  const bool connected = WiFi.status() == WL_CONNECTED;
+  if (connected) {
+    if (!previouslyConnected) printWifiAddress();
+    previouslyConnected = true;
+    return;
+  }
+
+  previouslyConnected = false;
+  if (!wifiCredentialsConfigured()) return;
+  const uint32_t nowMs = millis();
+  if (static_cast<uint32_t>(nowMs - lastWifiRetryMs) < WIFI_RETRY_INTERVAL_MS) {
+    return;
+  }
+  lastWifiRetryMs = nowMs;
+  Serial.println("Mat ket noi WiFi, dang thu ket noi lai...");
+  WiFi.reconnect();
+}
 
 uint16_t averageRawAdc(uint8_t pin) {
   uint32_t total = 0;
@@ -338,15 +399,7 @@ void setup() {
     Serial.println("Thu doi LCD_I2C_ADDRESS trong Config.h thanh 0x3F.");
   }
 
-  WiFi.mode(WIFI_AP);
-  if (WiFi.softAP(FALLBACK_AP_SSID)) {
-    Serial.print("WiFi AP: ");
-    Serial.println(FALLBACK_AP_SSID);
-    Serial.print("Dia chi IP: ");
-    Serial.println(WiFi.softAPIP());
-  } else {
-    Serial.println("Khong the khoi tao WiFi AP.");
-  }
+  connectWifi();
 
   readSensors(true);
   updateLcd(true);
@@ -354,6 +407,7 @@ void setup() {
 }
 
 void loop() {
+  maintainWifi();
   server.handleClient();
   readSensors();
   updateOverheatBuzzer();

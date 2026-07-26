@@ -152,9 +152,10 @@ function initialState(config = {}, now = new Date().toISOString()) {
 }
 
 class JsonStore {
-  constructor({ dataFile, config = {}, clock = () => new Date() }) {
+  constructor({ dataFile, config = {}, clock = () => new Date(), onNotification = null }) {
     this.dataFile = dataFile;
     this.clock = clock;
+    this.onNotification = typeof onNotification === 'function' ? onNotification : null;
     this.defaultConfig = createConfig(config);
     this.loadWarning = null;
     const now = this.now();
@@ -450,6 +451,13 @@ class JsonStore {
       this.state.config,
       now
     );
+    if (created > 0 && this.onNotification) {
+      const newNotifications = this.state.notifications.slice(-created);
+      for (const notification of newNotifications) {
+        Promise.resolve(this.onNotification(clone(notification), clone(this.state.config)))
+          .catch((error) => console.error(`Không thể gửi thông báo ngoài hệ thống: ${error.message}`));
+      }
+    }
     this.trimCollections();
     if (save) {
       this.save();

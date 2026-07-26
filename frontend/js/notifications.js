@@ -219,11 +219,11 @@
     function raiseCondition(key, active, notification, options = {}) {
         const previouslyActive = state.activeConditions.get(key) === true;
         state.activeConditions.set(key, Boolean(active));
-        if (!active) return;
+        if (!active) return false;
 
         const now = Date.now();
         const lastRaised = state.lastRaised.get(key) || 0;
-        if (previouslyActive && now - lastRaised < state.cooldownMs) return;
+        if (previouslyActive && now - lastRaised < state.cooldownMs) return false;
         state.lastRaised.set(key, now);
 
         const item = normalizeNotification({
@@ -235,6 +235,7 @@
         sendBrowserNotification(item);
         if (options.forceLocal || state.serverAvailable === false) addLocal(item);
         else if (state.serverAvailable === null) state.pendingLocal.push(item);
+        return true;
     }
 
     function ingestStatus(payload) {
@@ -242,7 +243,18 @@
         const temperature = number(data.temperature ?? data.temp);
         const light = number(data.lightLevel ?? data.light ?? data.ldr);
         const alerts = data.alerts || {};
-        const temperatureHigh = booleanValue(alerts.temperatureHigh) === true;
+        const temperatureThreshold = number(
+            data.thresholds?.temperature ?? data.config?.temperatureThreshold
+        );
+        const explicitTemperatureHigh = booleanValue(alerts.temperatureHigh);
+        const temperatureStatus = String(data.status?.temperature || '').trim().toUpperCase();
+        const temperatureHigh = explicitTemperatureHigh !== null
+            ? explicitTemperatureHigh
+            : temperatureStatus === 'HIGH' || (
+                temperature !== null &&
+                temperatureThreshold !== null &&
+                temperature > temperatureThreshold
+            );
         const lowLight = booleanValue(alerts.lowLight) === true;
         const intruderDetected = booleanValue(
             alerts.intruderDetected ?? data.motionDetected ?? data.presenceDetected
@@ -257,15 +269,25 @@
             source: data.source || 'controller'
         });
 
-        raiseCondition('temperature-high', temperatureHigh, {
+        const temperatureNotificationRaised = raiseCondition('temperature-high', temperatureHigh, {
             type: 'TEMPERATURE_HIGH',
             severity: 'danger',
-            title: 'High temperature detected',
-            message: temperature === null ? 'The temperature threshold was exceeded.' : `Temperature reached ${temperature.toFixed(1)}°C.`,
+            title: 'Cảnh báo quá nhiệt',
+            message: temperature === null
+                ? 'Nhiệt độ đã vượt ngưỡng an toàn. Vui lòng kiểm tra ngay.'
+                : `Nhiệt độ đạt ${temperature.toFixed(1)}°C${temperatureThreshold === null ? '' : `, vượt ngưỡng ${temperatureThreshold.toFixed(1)}°C`}.`,
             value: temperature,
-            threshold: data.thresholds?.temperature,
+            threshold: temperatureThreshold,
             source: data.source || 'controller'
         });
+        if (temperatureNotificationRaised && window.dashboard?.showToast) {
+            window.dashboard.showToast(
+                temperature === null
+                    ? 'Cảnh báo quá nhiệt: vui lòng kiểm tra ngay.'
+                    : `Cảnh báo quá nhiệt: ${temperature.toFixed(1)}°C.`,
+                'danger'
+            );
+        }
         raiseCondition('low-light', lowLight, {
             type: 'LOW_LIGHT',
             severity: 'warning',

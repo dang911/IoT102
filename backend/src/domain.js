@@ -5,6 +5,7 @@ const DEFAULT_CONFIG = Object.freeze({
   historyLimit: 240,
   notificationLimit: 500,
   notificationCooldownMs: 5 * 60 * 1000,
+  alertEmail: '',
   sensorOfflineTimeoutMs: 60 * 1000,
   forecastWindowSize: 12,
   forecastMinSamples: 4,
@@ -160,6 +161,14 @@ function normalizeConfigPatch(payload = {}, currentConfig = cloneDefaultConfig()
     next.notificationCooldownMs = Math.round(
       toNumber(payload.notificationCooldownMs, 'notificationCooldownMs', 0, 86400000)
     );
+  }
+
+  if (payload.alertEmail !== undefined) {
+    const email = String(payload.alertEmail || '').trim();
+    if (email.length > 254 || (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) {
+      throw new HttpError(400, 'alertEmail must be a valid email address');
+    }
+    next.alertEmail = email;
   }
 
   if (payload.sensorOfflineTimeoutMs !== undefined) {

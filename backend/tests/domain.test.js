@@ -23,6 +23,17 @@ test('configuration validates light hysteresis', () => {
   );
 });
 
+test('configuration accepts an alert recipient and rejects invalid email', () => {
+  assert.equal(
+    normalizeConfigPatch({ alertEmail: 'user@example.com' }).alertEmail,
+    'user@example.com'
+  );
+  assert.throws(
+    () => normalizeConfigPatch({ alertEmail: 'not-an-email' }),
+    /alertEmail/
+  );
+});
+
 test('status exposes temperature, light and motion without dust fields', () => {
   const now = '2026-07-23T10:00:00.000Z';
   const state = initialState(createConfig(), now);
