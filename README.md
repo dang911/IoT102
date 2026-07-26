@@ -30,7 +30,6 @@ LDR  ─┘      │
 |---|---|
 | GPIO34 | LM35 |
 | GPIO35 | LDR |
-| GPIO27 | HC-SR501 OUT |
 | GPIO26 | Điều khiển transistor của TMB12A05 |
 | GPIO2 | LED chiếu sáng |
 | GPIO21 / GPIO22 | LCD1602 I2C SDA / SCL |
