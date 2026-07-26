@@ -19,8 +19,8 @@ khiển đèn, LCD và còi; đồng thời cung cấp REST API cùng Web Dashbo
 
 ```text
 LM35 ─┐
-LDR  ─┼── ESP32 ── LED / LCD1602 / TMB12A05
-PIR  ─┘      │
+      ┼── ESP32 ── LED / LCD1602 / TMB12A05
+LDR  ─┘      │
              └── Wi-Fi ── REST API ── Web Dashboard
 ```
 
